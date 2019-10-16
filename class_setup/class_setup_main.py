@@ -72,7 +72,7 @@ class Setup(QtWidgets.QMainWindow):
 
         # Create empty file path
         # self.path = 'path_file'
-        self.file_path = ''
+        self.path = ''
 
         # UI labels
         self.lbl_description = QtWidgets.QLabel('Description:')
@@ -168,7 +168,7 @@ class Setup(QtWidgets.QMainWindow):
         with open(file_path + '_seq.txt', 'w') as file:
             file.write(description + '\n')
 
-        self.file_path = file_path
+        self.path = file_path
 
     def load(self):
         try:
@@ -187,7 +187,7 @@ class Setup(QtWidgets.QMainWindow):
                     self.recipe['step_time'].append(content[1].rstrip())
 
             self.generate_table()
-            self.file_path = file_path
+            self.path = file_path
         except:
             print('Load file error')
 
@@ -207,7 +207,7 @@ class Setup(QtWidgets.QMainWindow):
 
     def file_save(self):
         try:
-            file_path = self.file_path
+            file_path = self.path
             description = self.txt_description.text()
             print(file_path)
             file = open(file_path, 'w+')
