@@ -1,13 +1,14 @@
+import os
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog
+
 
 class Setup(QtWidgets.QMainWindow):
-
-    # Comment to signify things changed
-    # Lukas comment
-
-    # Define switch window as a type of pyqtSignal - i.e. once activated the window will be switched
+    """
+    Class that defines setup window in reader UI.
+    """
+    # Define switch window as a type of pyqtSignal, i.e., once activated the window will be switched
     switch_window = QtCore.pyqtSignal(list)
 
     def __init__(self):
@@ -20,155 +21,203 @@ class Setup(QtWidgets.QMainWindow):
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Plastique'))
 
         # File open, file save, and close menu actions
-        fileOpen = QtWidgets.QAction('&Open', self)
-        fileOpen.setShortcut('Ctrl+O')
-        fileOpen.setStatusTip('Open file')
-        fileOpen.triggered.connect(self.file_open)
+        file_open = QtWidgets.QAction('&Open', self)
+        file_open.setShortcut('Ctrl+O')
+        file_open.setStatusTip('Open file')
+        file_open.triggered.connect(self.load)
 
-        fileSave = QtWidgets.QAction('&Save', self)
-        fileSave.setShortcut('Ctrl+S')
-        fileSave.setStatusTip('Save file')
-        fileSave.triggered.connect(self.file_save)
+        file_save = QtWidgets.QAction('&Save', self)
+        file_save.setShortcut('Ctrl+S')
+        file_save.setStatusTip('Save file')
+        file_save.triggered.connect(self.file_save)
 
-        closeAction = QtWidgets.QAction('&Close', self)
-        closeAction.setShortcut('Ctrl+W')
-        closeAction.setStatusTip('Quit app')
-        closeAction.triggered.connect(self.close_app)
+        close_action = QtWidgets.QAction('&Close', self)
+        close_action.setShortcut('Ctrl+W')
+        close_action.setStatusTip('Quit app')
+        close_action.triggered.connect(self.close_app)
 
         self.statusBar()
 
         # Generate main menu items
-        mainMenu = self.menuBar()
-        fileMenu = mainMenu.addMenu('&File')
-        fileMenu.addAction(fileOpen)
-        fileMenu.addAction(fileSave)
-        fileMenu.addAction(closeAction)
+        main_menu = self.menuBar()
+        file_menu = main_menu.addMenu('&File')
+        file_menu.addAction(file_open)
+        file_menu.addAction(file_save)
+        file_menu.addAction(close_action)
 
-        optionsMenu = mainMenu.addMenu('&Options')
-        optionsMenu.addAction(closeAction)
+        options_menu = main_menu.addMenu('&Options')
+        options_menu.addAction(close_action)
 
-        helpMenu = mainMenu.addMenu('&Help')
-        helpMenu.addAction(closeAction)
+        help_menu = main_menu.addMenu('&Help')
+        help_menu.addAction(close_action)
 
         # Populate tool bar
-        returnHome = QtWidgets.QAction('Home', self)
-        returnHome.triggered.connect(self.main_window)
+        return_home = QtWidgets.QAction('Home', self)
+        return_home.triggered.connect(self.main_window)
 
-        openEditor = QtWidgets.QAction('Text editor', self)
-        openEditor.triggered.connect(self.editor)
+        open_editor = QtWidgets.QAction('Text editor', self)
+        open_editor.triggered.connect(self.editor)
 
-        self.toolBar = self.addToolBar('Create')
-        self.toolBar.addAction(returnHome)
-        self.toolBar.addAction(openEditor)
+        self.tool_bar = self.addToolBar('Create')
+        self.tool_bar.addAction(return_home)
+        self.tool_bar.addAction(open_editor)
+
+        # Initialize layout for widgets
+        self.layout = QtWidgets.QGridLayout()
+        self.recipeTable = QTableWidget()
 
         # Setup data
-        self.recipe = {'step_txt': ["base"], 'step_time': ["100"]}
+        # self.recipe = {'step_txt': ["base", "base"], 'step_time': ["100", "10"]}
+        self.recipe = {'step_txt': [], 'step_time': []}
 
-        # Execute main window
-        self.main_window()
+        # Create empty file path
+        # self.path = 'path_file'
+        self.file_path = ''
 
-        # Dummy path
-        self.path = ""
-
-    def main_window(self):
-        # Initialize
-        self.setCentralWidget(QtWidgets.QWidget(self))
-        self.layout = QtWidgets.QGridLayout()
-        self.centralWidget().setLayout(self.layout)
-        self.generate_table()
-        # Populate widgets
-        self.widgets()
-        self.display_widgets()
-
-    def widgets(self):
         # UI labels
-        self.lbl_exp_title = QtWidgets.QLabel('Experiment Title:')
+        self.lbl_description = QtWidgets.QLabel('Description:')
         self.lbl_step_name = QtWidgets.QLabel('Step Name:')
         self.lbl_step_time = QtWidgets.QLabel('Step Time [s]:')
+        self.lbl_recipe = QtWidgets.QLabel('Recipe:')
 
         # User text input
-        self.txt_exp_title = QtWidgets.QLineEdit()
-        self.txt_step_name = QtWidgets.QLineEdit()
+        self.txt_description = QtWidgets.QLineEdit('Test protein affinity')
+        self.txt_step_name = QtWidgets.QLineEdit('Add protein1')
         self.txt_step_time = QtWidgets.QLineEdit("100")
 
-        # Upload step information
-        self.btn_step_upload = QtWidgets.QPushButton('Add')
-        self.btn_step_upload.clicked.connect(self.Upload)
+        # Create new recipe file
+        self.btn_create_project = QtWidgets.QPushButton('New')
+        self.btn_create_project.clicked.connect(self.new)
+
+        # Load previous recipe
+        self.btn_load_project = QtWidgets.QPushButton('Load')
+        self.btn_load_project.clicked.connect(self.load)
+
+        # Add step
+        self.btn_step_add = QtWidgets.QPushButton('Add')
+        self.btn_step_add.clicked.connect(self.add)
+
+        # Reset
+        self.btn_reset_recipe = QtWidgets.QPushButton('Reset')
+        self.btn_reset_recipe.clicked.connect(self.reset)
+
+        # Save
+        self.btn_save = QtWidgets.QPushButton('Save')
+        self.btn_save.clicked.connect(self.file_save)
 
         # Go to next window
         self.btn_start = QtWidgets.QPushButton("Start Experiment")
         self.btn_start.pressed.connect(self.switch)
 
-        # Reset button
-        self.btn_reset_recipe = QtWidgets.QPushButton('Reset')
-        self.btn_reset_recipe.clicked.connect(self.reset)
+        # Execute main window
+        self.main_window()
+
+    def main_window(self):
+        # Initialize
+        self.setCentralWidget(QtWidgets.QWidget(self))
+        self.centralWidget().setLayout(self.layout)
+        self.generate_table()
+
+        # Populate widgets
+        self.display_widgets()
 
     def display_widgets(self):
         # Assign widget locations based on grid layout
-        self.layout.addWidget(self.lbl_exp_title, 2, 1)
+
+        # Text labels
+        self.layout.addWidget(self.lbl_description, 2, 1)
         self.layout.addWidget(self.lbl_step_name, 3, 1)
         self.layout.addWidget(self.lbl_step_time, 4, 1)
+        self.layout.addWidget(self.lbl_recipe, 5, 1)
 
-        self.layout.addWidget(self.txt_exp_title, 2, 2)
+        # Line edits
+        self.layout.addWidget(self.txt_description, 2, 2)
         self.layout.addWidget(self.txt_step_name, 3, 2)
         self.layout.addWidget(self.txt_step_time, 4, 2)
 
-        self.layout.addWidget(self.btn_start, 2, 3)
-        self.layout.addWidget(self.btn_step_upload, 4, 3)
+        # Buttons
+        self.layout.addWidget(self.btn_create_project, 1, 2)
+        self.layout.addWidget(self.btn_load_project, 1, 3)
+        self.layout.addWidget(self.btn_step_add, 4, 3)
         self.layout.addWidget(self.btn_reset_recipe, 5, 3)
+        self.layout.addWidget(self.btn_save, 6, 2)
+        self.layout.addWidget(self.btn_start, 7, 2)
 
         self.show()
 
     def generate_table(self):
         # Create table
-        self.recipeTable = QTableWidget()
         self.recipeTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.recipeTable.setRowCount(len(self.recipe['step_txt']))
         self.recipeTable.setColumnCount(2)
-        print(self.recipe)
 
-        row = 0
-        for i in range(0, len(self.recipe['step_txt'])):
-            self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][i]))
-            self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][i]))
-            row+=1
+        for row in range(len(self.recipe['step_txt'])):
+            self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
+            self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
+            row += 1
 
         self.layout.addWidget(self.recipeTable, 5, 2)
-
         self.show()
 
-    ##        table selection change
-    ##        self.tableWidget.doubleClicked.connect(self.on_click)
+        # table selection change
+        # self.tableWidget.doubleClicked.connect(self.on_click)
 
-    def reset(self):
-        self.recipe = {'step_txt':[], 'step_time':[]}
-        self.generate_table()
+    def new(self):
+        description = self.txt_description.text()
+        file_path = QFileDialog.getSaveFileName(self, 'Save File', os.getenv('HOME'))[0]
+        with open(file_path + '_seq.txt', 'w') as file:
+            file.write(description + '\n')
 
-    def Upload(self):
+        self.file_path = file_path
+
+    def load(self):
+        try:
+            file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', 'TXT (*.txt)')[0]
+            file = open(file_path, 'r')  # Open with the intention to read
+
+            if file.mode == 'r':  # Check if file is in 'read mode'
+                self.recipe = {'step_txt': [], 'step_time': []}
+
+                for x in range(2):
+                    next(file)
+
+                for line in file:
+                    content = line.split(' : ')
+                    self.recipe['step_txt'].append(content[0])
+                    self.recipe['step_time'].append(content[1].rstrip())
+
+            self.generate_table()
+            self.file_path = file_path
+        except:
+            print('Load file error')
+
+    def add(self):
         update_name = self.txt_step_name.text()
         self.recipe['step_txt'].append(update_name)
 
         update_time = self.txt_step_time.text()
         self.recipe['step_time'].append(update_time)
+        print(self.recipe)
 
         self.generate_table()
 
-    def file_open(self):
-        name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')[0]
-        file = open(name, 'r')  # Open with the intention to read
-
-        self.editor()
-
-        with file:
-            text = file.read()
-            self.textEdit.setText(text)
+    def reset(self):
+        self.recipe = {'step_txt': [], 'step_time': []}
+        self.generate_table()
 
     def file_save(self):
-        name = QtWidgets.QFileDialog.getSaveFileName(self, 'Save file')[0]
-        file = open(name, 'w')
-        text = self.textEdit.toPlainText()
-        file.write(text)
-        file.close()
+        try:
+            file_path = self.file_path
+            description = self.txt_description.text()
+            print(file_path)
+            file = open(file_path, 'w+')
+
+            file.write(description + '\n\n')
+
+            for i in range(len(self.recipe['step_txt'])):
+                file.write(self.recipe['step_txt'][i] + ' : ' + self.recipe['step_time'][i] + '\n')
+        except:
+            print('File save error')
 
     def editor(self):
         self.textEdit = QtWidgets.QTextEdit()
@@ -181,8 +230,6 @@ class Setup(QtWidgets.QMainWindow):
             sys.exit()
         else:
             pass
-
-        # self.experiment_step = {"time": ["10", "20", "30"], "steps": ["baseline", "avidin", "baseline"]}
 
     def switch(self):
         pass_val = [self.recipe, self.path]
