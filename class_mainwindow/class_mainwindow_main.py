@@ -10,7 +10,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, pass_value):
         super(MainWindow, self).__init__()
-        self.setGeometry(50, 50, 600, 300)
+        self.setGeometry(50, 50, 600, 800)
 
         self.setWindowTitle('HexagonFab Run Experiment')
         self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
@@ -22,19 +22,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.experiment_steps = pass_value[0]
         self.path = pass_value[1]
 
+        # XXXX
         # Initialize communication with Arduino
-        self.go_state = False  # Create class variables (i.e. go_state)
+        # self.go_state = False  # Create class variables (i.e. go_state)
+
+        # try:
+        #     # self.ard = serial.Serial(
+        #     #    port='COM1',
+        #     #    baudrate=500000,
+        #     #    timeout=2
+        #     # )
+        #     time.sleep(2)  # Pause execution for 2 seconds
+        #     self.go_state = False
+        # except:
+        #     self.go_state = False
+        # XXXX
+
+        # Overide go_state
+        self.go_state = True
         self.save_timer = 0
-        try:
-            # self.ard = serial.Serial(
-            #    port='COM1',
-            #    baudrate=500000,
-            #    timeout=2
-            # )
-            time.sleep(2)  # Pause execution for 2 seconds
-            self.go_state = False
-        except:
-            self.go_state = False
+
         # Setting up the data sets for saving and displaying
         self.data = {
             'data1': [],
@@ -43,7 +50,7 @@ class MainWindow(QtWidgets.QMainWindow):
             'data4': [],
             'notes': [[0.0, 0.0, 'start_program']],
         }
-        self.time_start_true = time.time()  # Number of seconds since time epoch
+
         self.display_no = 500  # Initial amount of data points displayed
 
         # Timer to data collect
@@ -71,19 +78,30 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widgets()
         self.display_widgets()
 
-        # Save a Dummy file
-        self.Save()
-
     def widgets(self):
 
-        # Code Olli --------------------------------------------
+
         # Start and stop button and connection
+        self.btn_connect = QtGui.QPushButton('connect')  # Create instance of QPushButton
+        self.btn_connect.clicked.connect(self.StartShowing)  # Call StartShowing function when start button pressed
         self.btn_start = QtGui.QPushButton('start')  # Create instance of QPushButton
         self.btn_start.clicked.connect(self.StartRecording)  # Call StartRecording function when start button pressed
+        self.btn_start.pressed.connect(lambda x=self.experiment_steps: self.step_experiment(x))  # Trigger first step in experiment
         self.btn_stop = QtGui.QPushButton('stop')
         self.btn_stop.clicked.connect(self.StopRecording)  # Call StopRecording function at button press
         self.btn_reset = QtGui.QPushButton('Reset')
         self.btn_reset.clicked.connect(self.Reset)  # Call Reset function at button press
+
+        # Label showing the experimental steps
+        self.time_counter = QtWidgets.QLabel("Waiting to start experiment")
+        self.duration_counter = QtWidgets.QLabel()
+        self.step_counter = QtWidgets.QLabel()
+        self.duration_next = QtWidgets.QLabel()
+        self.step_next = QtWidgets.QLabel()
+
+        # Buttons to navigate the experiments
+        self.button_experiment = QtWidgets.QPushButton("next")
+        self.button_experiment.pressed.connect(lambda x=self.experiment_steps: self.step_experiment(x))
 
         # Note text and connection
         self.txt_note = QtGui.QLineEdit('note')  # Create instance of QLineEdit
@@ -94,8 +112,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.txt_file = QtGui.QLineEdit('file_name')  # Create instance of QLineEdit
         # self.btn_save = QtGui.QPushButton('save')  # Create instance of QPushButton
         # self.btn_save.clicked.connect(self.Save)  # Call Save function at button press
-        self.btn_file = QtGui.QPushButton('file...')  # Create instance of QPushButton
-        self.btn_file.clicked.connect(self.ChooseFile)  # Call ChooseFile function at button press
+        # self.btn_file = QtGui.QPushButton('file...')  # Create instance of QPushButton
+        # self.btn_file.clicked.connect(self.ChooseFile)  # Call ChooseFile function at button press
 
         # What - data widgets
         self.data_select1 = QtGui.QCheckBox('Sensor1')  # Create instance of QCheckBox
@@ -106,12 +124,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.points_label = QtGui.QLabel('No data points : ')  # Create instance of QLabel
         self.txt_points = QtGui.QLineEdit('500')  # Create instance of QLineEdit
 
-        # Comport select
-        self.com_label = QtGui.QLabel('Com Port : ')  # Create instance of QLabel
-        self.com_select = QtGui.QComboBox()  # Create instance of QComboBox
-        for port in ['COM' + str(x) for x in range(12)]:
-            self.com_select.addItem(port)  # Call Qt function addItem on self.com_select
-        self.com_select.currentIndexChanged.connect(self.SetPort)  # Call SetPort function to select com port
+        # # Comport select
+        # self.com_label = QtGui.QLabel('Com Port : ')  # Create instance of QLabel
+        # self.com_select = QtGui.QComboBox()  # Create instance of QComboBox
+        # for port in ['COM' + str(x) for x in range(12)]:
+        #     self.com_select.addItem(port)  # Call Qt function addItem on self.com_select
+        # self.com_select.currentIndexChanged.connect(self.SetPort)  # Call SetPort function to select com port
 
         # Plot widgets and lines
         self.plot = pg.PlotWidget()
@@ -123,21 +141,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.l6 = self.plot.plot(pen=pg.mkPen('w', width=3, style=QtCore.Qt.DashLine))
 
         # --------------------------------------------
-        self.time_counter = QtWidgets.QLabel("Press NEXT to start experiment")
-        self.duration_counter = QtWidgets.QLabel()
-        self.step_counter = QtWidgets.QLabel()
-        self.duration_next = QtWidgets.QLabel()
-        self.step_next = QtWidgets.QLabel()
 
-        self.button_experiment = QtWidgets.QPushButton("next")
-        self.button_experiment.pressed.connect(lambda x=self.experiment_steps: self.step_experiment(x))
 
     def display_widgets(self):
         # Code from Olli --------------------------------------------
         # Build all widgets and set locations
+        self.layout.addWidget(self.btn_connect, 0, 3)
         self.layout.addWidget(self.btn_start, 1, 3)
-        self.layout.addWidget(self.btn_stop, 0, 3)
-        self.layout.addWidget(self.btn_reset, 2, 3)
+        self.layout.addWidget(self.btn_stop, 2, 3)
+        self.layout.addWidget(self.btn_reset, 4, 3)
 
         self.layout.addWidget(self.points_label, 0, 0)
         self.layout.addWidget(self.txt_points, 0, 1)
@@ -146,8 +158,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.data_select2, 1, 2)
         self.layout.addWidget(self.data_select3, 2, 2)
 
-        self.layout.addWidget(self.com_select, 1, 1)
-        self.layout.addWidget(self.com_label, 1, 0)
+        # self.layout.addWidget(self.com_select, 1, 1)
+        # self.layout.addWidget(self.com_label, 1, 0)
 
         # self.layout.addWidget(self.btn_note, 1, 1)
         self.layout.addWidget(self.btn_note, 2, 1)
@@ -155,18 +167,18 @@ class MainWindow(QtWidgets.QMainWindow):
         # layout.addWidget(listw, 3, 0)
         self.layout.addWidget(self.plot, 3, 0, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
-        self.layout.addWidget(self.btn_file, 4, 2)
+        # self.layout.addWidget(self.btn_file, 4, 2)
         # self.layout.addWidget(self.txt_file, 4, 0, 1, 2)
         # self.layout.addWidget(self.btn_save, 4, 3)
         # --------------------------------------------
 
         # Assign widget locations based on grid layout
         self.layout.addWidget(self.time_counter, 5, 1)
-        self.layout.addWidget(self.duration_counter, 5, 2)
+        self.layout.addWidget(self.duration_counter, 6, 1)
         self.layout.addWidget(self.step_counter, 6, 2)
-        self.layout.addWidget(self.duration_next, 6, 1)
+        self.layout.addWidget(self.duration_next, 7, 1)
         self.layout.addWidget(self.step_next, 7, 2)
-        self.layout.addWidget(self.button_experiment, 7, 1)
+        self.layout.addWidget(self.button_experiment, 8, 1)
 
         self.show()
 
@@ -215,11 +227,18 @@ class MainWindow(QtWidgets.QMainWindow):
     # Communicate with Arduino to receive data
     def UpdateData(self):
         time_true = time.time() - self.time_start_true
-        time_sincestart = time.time() - self.time_start
+        print(time_true)
+
+        # Hotfix for start data since begining
+        time_sincestart = time.time() - self.time_start_true
         try:
-            self.ard.write(b'1')
-            msg = self.ard.readline()[0:-2].decode("utf-8")
-            print(msg)
+            # XXXX
+            # self.ard.write(b'1')
+            # Commented out communication part with Arduino for testing with dummy data
+            # msg = self.ard.readline()[0:-2].decode("utf-8")
+            # XXXX
+
+            msg = "1000.0, 2000.0, 3000.0, 4000.0"
             msg = msg.split(',')
             if float(msg[0]) > 0 and float(msg[0]) < 20000:
                 self.data['data1'].append([time_true, time_sincestart, float(msg[0])])
@@ -245,10 +264,11 @@ class MainWindow(QtWidgets.QMainWindow):
             # self.data['data3'].append([time_true,time_sincestart,float(msg[2])])
             # self.data['data4'].append([time_true,time_sincestart,float(msg[3])])
         except:
-            print('Could not be read correctly')
+            print('Update Data could not be read correctly')
 
-        if time_true - self.save_timer > 600:
-            self.Save()
+        if self.save_state:
+            if time_true - self.save_timer > 5:
+                self.Save()
 
     # Communicate with Arduino to receive data
     def UpdateGraph(self):
@@ -301,7 +321,17 @@ class MainWindow(QtWidgets.QMainWindow):
     def StartRecording(self):
         if self.go_state:
             self.time_start = time.time()
+            self.time_start_true = time.time()  # Fix start time (i.e. so that difference with timer gives time passed)
+            self.step_tracker = 0 # Set step tracker to 0 to run recipe from start
             self.timer.start(100)
+            self.save_state = True
+
+    def StartShowing(self):
+        if self.go_state:
+            self.time_start = time.time()
+            self.time_start_true = time.time()  # Fix start time (i.e. so that difference with timer gives time passed)
+            self.timer.start(100)
+            self.save_state = False
 
     def Reset(self):
         self.data = {
@@ -326,15 +356,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.data['notes'].append([time_true, time_sincestart, msg])
 
     def Save(self):
-        print(self.path)
         msg = self.path
-        # ar = np.zeros([len(self.data['data1']), 5])
-        ar = np.zeros([5, 5])
-        # ar[:,0] = [x[0] for x in self.data['data1']]
-        # ar[:,1] = [x[2] for x in self.data['data1']]
-        # ar[:,2] = [x[2] for x in self.data['data2']]
-        # ar[:,3] = [x[2] for x in self.data['data3']]
-        # ar[:,4] = [x[2] for x in self.data['data4']]
+
+        ar = np.zeros([len(self.data['data1']), 5])
+        ar[:,0] = [x[0] for x in self.data['data1']]
+        ar[:,1] = [x[2] for x in self.data['data1']]
+        ar[:,2] = [x[2] for x in self.data['data2']]
+        ar[:,3] = [x[2] for x in self.data['data3']]
+        ar[:,4] = [x[2] for x in self.data['data4']]
 
         with open(msg + 'dummy_data.txt', 'w+') as f:
             np.savetxt(f, ar, fmt=['%f', '%f', '%f', '%f', '%f'])
