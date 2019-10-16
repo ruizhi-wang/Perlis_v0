@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableW
 class Setup(QtWidgets.QMainWindow):
 
     # Comment to signify things changed
+    # Lukas comment
 
     # Define switch window as a type of pyqtSignal - i.e. once activated the window will be switched
     switch_window = QtCore.pyqtSignal(list)
