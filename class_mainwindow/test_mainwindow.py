@@ -23,7 +23,7 @@ class Controller:
 # Run code
 def main():
     # Define dummy values for passing in
-    recipe = {'step_txt': ["ambient", "base", "protein"], 'step_time': ["20", "20", "20"]}
+    recipe = {'step_txt': ["ambient", "base", "protein"], 'step_time': ["20", "30", "40"]}
     path = ""
     pass_value = [recipe, path]
 

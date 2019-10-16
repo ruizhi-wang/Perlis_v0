@@ -82,8 +82,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         # Start and stop button and connection
-        self.btn_connect = QtGui.QPushButton('connect')  # Create instance of QPushButton
-        self.btn_connect.clicked.connect(self.StartShowing)  # Call StartShowing function when start button pressed
+        self.btn_connect = QtGui.QPushButton('connect sensor')  # Create instance of QPushButton
+        self.btn_connect.clicked.connect(self.ConnectSensor)  # Call StartShowing function when start button pressed
         self.btn_start = QtGui.QPushButton('start')  # Create instance of QPushButton
         self.btn_start.clicked.connect(self.StartRecording)  # Call StartRecording function when start button pressed
         self.btn_start.pressed.connect(lambda x=self.experiment_steps: self.step_experiment(x))  # Trigger first step in experiment
@@ -100,8 +100,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.step_next = QtWidgets.QLabel()
 
         # Buttons to navigate the experiments
-        self.button_experiment = QtWidgets.QPushButton("next")
-        self.button_experiment.pressed.connect(lambda x=self.experiment_steps: self.step_experiment(x))
+        self.btn_experiment = QtWidgets.QPushButton("next")
+        self.btn_experiment.pressed.connect(lambda x=self.experiment_steps: self.step_experiment(x))
 
         # Note text and connection
         self.txt_note = QtGui.QLineEdit('note')  # Create instance of QLineEdit
@@ -162,8 +162,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.layout.addWidget(self.com_label, 1, 0)
 
         # self.layout.addWidget(self.btn_note, 1, 1)
-        self.layout.addWidget(self.btn_note, 2, 1)
-        self.layout.addWidget(self.txt_note, 2, 0)
+        # self.layout.addWidget(self.btn_note, 2, 1)
+        # self.layout.addWidget(self.txt_note, 2, 0)
         # layout.addWidget(listw, 3, 0)
         self.layout.addWidget(self.plot, 3, 0, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
@@ -178,7 +178,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.step_counter, 6, 2)
         self.layout.addWidget(self.duration_next, 7, 1)
         self.layout.addWidget(self.step_next, 7, 2)
-        self.layout.addWidget(self.button_experiment, 8, 1)
+        self.layout.addWidget(self.btn_experiment, 8, 1)
+
+        self.BtnDisable()
 
         self.show()
 
@@ -195,6 +197,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def step_experiment(self, experiment_steps):
         a = len(experiment_steps["step_time"])
+
+        print("activated")
 
         if self.step_tracker < a:
             self.timer_counter()
@@ -227,7 +231,6 @@ class MainWindow(QtWidgets.QMainWindow):
     # Communicate with Arduino to receive data
     def UpdateData(self):
         time_true = time.time() - self.time_start_true
-        print(time_true)
 
         # Hotfix for start data since begining
         time_sincestart = time.time() - self.time_start_true
@@ -278,6 +281,7 @@ class MainWindow(QtWidgets.QMainWindow):
         d4 = [x[2] for x in self.data['data4']]
         d_avg1 = (np.array(d1) + np.array(d2)) / 2
         d_avg2 = (np.array(d3) + np.array(d4)) / 2
+
         try:
             self.display_no = int(self.txt_points.text())
         except:
@@ -318,6 +322,16 @@ class MainWindow(QtWidgets.QMainWindow):
                            not self.data_select1.isChecked() and \
                            self.data_select3.isChecked())
 
+    def ConnectSensor(self):
+        if self.go_state:
+            self.time_start = time.time()
+            self.time_start_true = time.time()  # Fix start time (i.e. so that difference with timer gives time passed)
+            self.timer.start(100)
+            self.save_state = False
+
+            # self.PopUp_Halt()
+            self.BtnEnable()
+
     def StartRecording(self):
         if self.go_state:
             self.time_start = time.time()
@@ -326,14 +340,37 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer.start(100)
             self.save_state = True
 
-    def StartShowing(self):
-        if self.go_state:
-            self.time_start = time.time()
-            self.time_start_true = time.time()  # Fix start time (i.e. so that difference with timer gives time passed)
-            self.timer.start(100)
-            self.save_state = False
+    def BtnEnable(self):
+        self.btn_start.setEnabled(True)
+        self.btn_stop.setEnabled(True)
+        self.btn_reset.setEnabled(True)
+        self.btn_experiment.setEnabled(True)
+
+    def BtnDisable(self):
+        self.btn_start.setEnabled(False)
+        self.btn_stop.setEnabled(False)
+        self.btn_reset.setEnabled(False)
+        self.btn_experiment.setEnabled(False)
+
+    # def PopUp_Halt(self):
+    #     print("Opening a new popup window...")
+    #     self.w = MyPopup()
+    #     self.w.setGeometry(QRect(100, 100, 400, 200))
+    #     self.w.show()
 
     def Reset(self):
+        # Reset plot
+        self.l1.setData([0.0])
+        self.l2.setData([0.0])
+        self.l3.setData([0.0])
+        self.l4.setData([0.0])
+        self.l5.setData([0.0])
+        self.l6.setData([0.0])
+
+        # Stop time
+        self.timer.stop()
+
+        # Stop plotting
         self.data = {
             'data1': [],
             'data2': [],
@@ -341,6 +378,19 @@ class MainWindow(QtWidgets.QMainWindow):
             'data4': [],
             'notes': [[0.0, 0.0, 'start_program']],
         }
+
+        # Reset recipe
+        self.step_tracker = 0  # Set step tracker to 0 to run recipe from start
+
+        self.time_counter.setText("Waiting for start of experiment")
+        self.duration_counter.setText("")
+        self.step_counter.setText("")
+        self.duration_next.setText("")
+        self.step_next.setText("")
+
+        # Disable all buttons
+        self.BtnDisable()
+        self.timer_experiment.stop()
 
     def StopRecording(self):
         self.timer.stop()
