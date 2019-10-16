@@ -6,10 +6,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from class_setup import class_setup_main
 from class_mainwindow import class_mainwindow_main
 
-# Import style packages
-import qtmodern.styles
-import qtmodern.windows
-
+# Comment to test if git works
 
 # Define controller to act
 class Controller:
@@ -35,9 +32,6 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     controller = Controller()
     controller.show_setup()
-    # qtmodern.styles.dark(app)
-    # mw = qtmodern.windows.ModernWindow(Controller())
-    # mw.show()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
