@@ -7,6 +7,7 @@ from class_setup import class_setup_main
 from class_mainwindow import class_mainwindow_main
 
 # Comment to test if git works
+# GitHub makes me sad
 
 # Define controller to act
 class Controller:
