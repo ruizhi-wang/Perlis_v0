@@ -23,8 +23,8 @@ class Controller:
 # Run code
 def main():
     # Define dummy values for passing in
-    recipe = {'step_txt': ["base"], 'step_time': ["100"]}
-    path = "/Users/ruizhiwang/Desktop"
+    recipe = {'step_txt': ["ambient", "base", "protein"], 'step_time': ["20", "20", "20"]}
+    path = ""
     pass_value = [recipe, path]
 
     app = QtWidgets.QApplication(sys.argv)
