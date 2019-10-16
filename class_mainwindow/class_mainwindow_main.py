@@ -336,7 +336,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # ar[:,3] = [x[2] for x in self.data['data3']]
         # ar[:,4] = [x[2] for x in self.data['data4']]
 
-        with open(msg + '/dummy_data.txt', 'w+') as f:
+        with open(msg + 'dummy_data.txt', 'w+') as f:
             np.savetxt(f, ar, fmt=['%f', '%f', '%f', '%f', '%f'])
 
         # with open(msg+'_notes.txt','w+') as f:
