@@ -1,6 +1,7 @@
 # Import general modules
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
+# Minor edit
 
 # Import Perlis modules
 from class_setup import class_setup_main
