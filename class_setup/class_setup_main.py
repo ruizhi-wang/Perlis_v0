@@ -65,7 +65,7 @@ class Setup(QtWidgets.QMainWindow):
         self.main_window()
 
         # Dummy path
-        self.path = "/Users/ruizhiwang/Desktop"
+        self.path = ""
 
     def main_window(self):
         # Initialize
