@@ -6,6 +6,8 @@ import numpy as np
 import serial
 import time
 
+# Comment to check
+
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, pass_value):
