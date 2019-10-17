@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from class_setup import class_setup_main
 from class_mainwindow import class_mainwindow_main
 
-# Comment to test if git works
+# Comment dummy
 
 # Define controller to act
 class Controller:
