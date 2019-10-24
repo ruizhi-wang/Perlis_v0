@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout, QMessageBox
 import pyqtgraph as pg
 import numpy as np
 import serial
@@ -10,11 +10,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, pass_value):
         super(MainWindow, self).__init__()
+
         self.setGeometry(50, 50, 600, 800)
 
         self.setWindowTitle('HexagonFab Run Experiment')
         self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
 
+        #--------------------------------------------------------------------------------------------------------------
+        # Helper variables
         # Initialize the time counter
         self.counter = 0
         # Initialize step counter
@@ -22,9 +25,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.experiment_steps = pass_value[0]
         self.path = pass_value[1]
 
+        # Set dummy resistance value
+        self.resistance_val = "1000.0, 2000.0, 3000.0, 4000.0"
+        # --------------------------------------------------------------------------------------------------------------
         # XXXX
         # Initialize communication with Arduino
-        # self.go_state = False  # Create class variables (i.e. go_state)
+        # self.go_state = False  # Create class variables (i.e. go_state) and set it to
 
         # try:
         #     # self.ard = serial.Serial(
@@ -38,9 +44,10 @@ class MainWindow(QtWidgets.QMainWindow):
         #     self.go_state = False
         # XXXX
 
-        # Overide go_state
+        # XXXX Overide go_state
         self.go_state = True
         self.save_timer = 0
+        # XXXX
 
         # Setting up the data sets for saving and displaying
         self.data = {
@@ -80,20 +87,31 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def widgets(self):
 
+        # Select the comport
+        self.com_label = QtGui.QLabel('Com Port : ')                # Create instance of QLabel
+        self.com_select = QtGui.QComboBox()                         # Create instance of QComboBox
+        for port in ['COM' + str(x) for x in range(12)]:
+            self.com_select.addItem(port)                           # Call Qt function addItem on self.com_select
+        # XXXX
+        # self.com_select.currentIndexChanged.connect(self.SetPort)   # Call SetPort function to select com port
+        # XXXX
 
-        # Start and stop button and connection
+        # Start connection & showing the graph
         self.btn_connect = QtGui.QPushButton('connect sensor')  # Create instance of QPushButton
         self.btn_connect.clicked.connect(self.ConnectSensor)  # Call StartShowing function when start button pressed
+        self.btn_connect.clicked.connect(self.PopUpConnect)  # Call popup function when start button pressed
+
+        # Operating the experiment
         self.btn_start = QtGui.QPushButton('start')  # Create instance of QPushButton
         self.btn_start.clicked.connect(self.StartRecording)  # Call StartRecording function when start button pressed
-        self.btn_start.pressed.connect(lambda x=self.experiment_steps: self.step_experiment(x))  # Trigger first step in experiment
+        self.btn_start.pressed.connect(self.StepExperiment)  # Trigger first step in experiment
         self.btn_stop = QtGui.QPushButton('stop')
         self.btn_stop.clicked.connect(self.StopRecording)  # Call StopRecording function at button press
         self.btn_reset = QtGui.QPushButton('Reset')
         self.btn_reset.clicked.connect(self.Reset)  # Call Reset function at button press
 
         # Label showing the experimental steps
-        self.time_counter = QtWidgets.QLabel("Waiting to start experiment")
+        self.current_time_counter = QtWidgets.QLabel("Waiting to start experiment")
         self.duration_counter = QtWidgets.QLabel()
         self.step_counter = QtWidgets.QLabel()
         self.duration_next = QtWidgets.QLabel()
@@ -101,8 +119,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Buttons to navigate the experiments
         self.btn_experiment = QtWidgets.QPushButton("next")
-        self.btn_experiment.pressed.connect(lambda x=self.experiment_steps: self.step_experiment(x))
-
+        self.btn_experiment.pressed.connect(self.StepExperiment) # Trigger next step in experimetn
         # Note text and connection
         self.txt_note = QtGui.QLineEdit('note')  # Create instance of QLineEdit
         self.btn_note = QtGui.QPushButton('add note')  # Create instance of QPushButton
@@ -142,7 +159,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --------------------------------------------
 
-
     def display_widgets(self):
         # Code from Olli --------------------------------------------
         # Build all widgets and set locations
@@ -158,8 +174,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.data_select2, 1, 2)
         self.layout.addWidget(self.data_select3, 2, 2)
 
-        # self.layout.addWidget(self.com_select, 1, 1)
-        # self.layout.addWidget(self.com_label, 1, 0)
+        self.layout.addWidget(self.com_select, 1, 1)
+        self.layout.addWidget(self.com_label, 1, 0)
 
         # self.layout.addWidget(self.btn_note, 1, 1)
         # self.layout.addWidget(self.btn_note, 2, 1)
@@ -173,9 +189,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # --------------------------------------------
 
         # Assign widget locations based on grid layout
-        self.layout.addWidget(self.time_counter, 5, 1)
-        self.layout.addWidget(self.duration_counter, 6, 1)
-        self.layout.addWidget(self.step_counter, 6, 2)
+        self.layout.addWidget(self.current_time_counter, 6, 1)
+        self.layout.addWidget(self.duration_counter, 5, 1)
+        self.layout.addWidget(self.step_counter, 5, 2)
         self.layout.addWidget(self.duration_next, 7, 1)
         self.layout.addWidget(self.step_next, 7, 2)
         self.layout.addWidget(self.btn_experiment, 8, 1)
@@ -184,44 +200,53 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.show()
 
-    def timer_counter(self):
+    def timer_countdown_counter(self):
         # Timer to keep track of time passed for each period
         self.timer_experiment = QtCore.QTimer()
         self.timer_experiment.setInterval(1000)
         self.timer_experiment.timeout.connect(self.recurring_timer)
         self.timer_experiment.start()
 
+    def timer_step_counter(self):
+        self.timer_step = QtCore.QTimer()
+        step_time=int(self.experiment_steps["step_time"][self.step_tracker])*1000
+        self.timer_step.setInterval(step_time)
+        self.timer_step.timeout.connect(self.PopUpStep)
+        self.timer_step.start()
+
+
     def recurring_timer(self):
         self.counter -= 1
-        self.time_counter.setText("Time remaining: %d" % self.counter)
+        self.current_time_counter.setText("Time remaining: %d" % self.counter)
 
-    def step_experiment(self, experiment_steps):
-        a = len(experiment_steps["step_time"])
+    def StepExperiment(self):
+        num_steps = len(self.experiment_steps["step_time"])
 
-        print("activated")
-
-        if self.step_tracker < a:
-            self.timer_counter()
+        # Timers stated here in case there are still experimental steps left
+        if self.step_tracker < num_steps:
+            self.timer_countdown_counter()
             # Get index of current step
-            self.counter = int(experiment_steps["step_time"][self.step_tracker])
+            self.counter = int(self.experiment_steps["step_time"][self.step_tracker])
+            self.timer_step_counter()
         else:
-            self.timer_counter()
+            self.timer_countdown_counter()
             self.timer_experiment.stop()
-            self.time_counter.setText("Time remaining: Experiment over")
+            self.current_time_counter.setText("Time remaining: Experiment over")
 
-        if self.step_tracker < a:
+        # Display information about the correct step
+        if self.step_tracker < num_steps:
             # Display information about current step
-            self.step_counter.setText("Name of current step: " + experiment_steps["step_txt"][self.step_tracker])
+            self.step_counter.setText("Name of current step: " + self.experiment_steps["step_txt"][self.step_tracker])
             self.duration_counter.setText(
-                "Duration of current step: " + experiment_steps["step_time"][self.step_tracker])
+                "Duration of current step: " + self.experiment_steps["step_time"][self.step_tracker])
         else:
             self.step_counter.setText("End of Experiment")
             self.duration_counter.setText("End of Experiment")
 
-        if self.step_tracker + 1 < a:
+        if self.step_tracker + 1 < num_steps:
             # Display information about next step
-            self.step_next.setText("Name of next step: " + experiment_steps["step_txt"][self.step_tracker + 1])
-            self.duration_next.setText("Duration of next step: " + experiment_steps["step_time"][self.step_tracker + 1])
+            self.step_next.setText("Name of next step: " + self.experiment_steps["step_txt"][self.step_tracker + 1])
+            self.duration_next.setText("Duration of next step: " + self.experiment_steps["step_time"][self.step_tracker + 1])
         else:
             self.step_next.setText("End of Experiment")
             self.duration_next.setText("End of Experiment")
@@ -241,8 +266,8 @@ class MainWindow(QtWidgets.QMainWindow):
             # msg = self.ard.readline()[0:-2].decode("utf-8")
             # XXXX
 
-            msg = "1000.0, 2000.0, 3000.0, 4000.0"
-            msg = msg.split(',')
+            # Def dummy reistance values for testing
+            msg=self.resistance_val.split(',')
             if float(msg[0]) > 0 and float(msg[0]) < 20000:
                 self.data['data1'].append([time_true, time_sincestart, float(msg[0])])
             else:
@@ -329,14 +354,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer.start(100)
             self.save_state = False
 
-            # self.PopUp_Halt()
-            self.BtnEnable()
-
     def StartRecording(self):
         if self.go_state:
             self.time_start = time.time()
             self.time_start_true = time.time()  # Fix start time (i.e. so that difference with timer gives time passed)
-            self.step_tracker = 0 # Set step tracker to 0 to run recipe from start
             self.timer.start(100)
             self.save_state = True
 
@@ -352,12 +373,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_reset.setEnabled(False)
         self.btn_experiment.setEnabled(False)
 
-    # def PopUp_Halt(self):
-    #     print("Opening a new popup window...")
-    #     self.w = MyPopup()
-    #     self.w.setGeometry(QRect(100, 100, 400, 200))
-    #     self.w.show()
-
     def Reset(self):
         # Reset plot
         self.l1.setData([0.0])
@@ -368,7 +383,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.l6.setData([0.0])
 
         # Stop time
+        # Stop global timer
         self.timer.stop()
+
+        # Stop experiment step counter
+        try:
+            self.timer_experiment.stop()
+        except:
+            pass
 
         # Stop plotting
         self.data = {
@@ -382,15 +404,14 @@ class MainWindow(QtWidgets.QMainWindow):
         # Reset recipe
         self.step_tracker = 0  # Set step tracker to 0 to run recipe from start
 
-        self.time_counter.setText("Waiting for start of experiment")
+        self.current_time_counter.setText("Waiting for start of experiment")
         self.duration_counter.setText("")
         self.step_counter.setText("")
         self.duration_next.setText("")
         self.step_next.setText("")
 
-        # Disable all buttons
+        # Disable all buttons except connect
         self.BtnDisable()
-        self.timer_experiment.stop()
 
     def StopRecording(self):
         self.timer.stop()
@@ -453,3 +474,37 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             # print('no sucessful connection')
             self.go_state = False
+
+    #-------------------------------------------------------------------------------------------------------------------
+    # Definition of PopUps
+    def PopUpConnect(self):
+        resistance_list=self.resistance_val.split(',')
+        text_message = "Sensor resistance values \n"\
+                       +"Sensor 1 - Ch1: "+resistance_list[0]+"\n"+"Sensor 1 - Ch2: "+resistance_list[1]+"\n"+"Sensor 2 - Ch3: "+resistance_list[2]+"\n"+"Sensor 2 - Ch4: "+resistance_list[3]
+
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText(text_message)
+        msgBox.setWindowTitle("QMessageBox Example")
+        msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        # msgBox.buttonClicked.connect(msgButtonClick)
+        returnValue = msgBox.exec()
+        if returnValue == QMessageBox.Ok:
+            self.BtnEnable()
+
+    def PopUpStep(self):
+        try:
+            text_message = "Step PopUp"
+
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Information)
+            current_step=self.step_tracker
+            msgBox.setText(str(self.experiment_steps["step_txt"][current_step]))
+            msgBox.setWindowTitle("QMessageBox Example")
+            msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            # msgBox.buttonClicked.connect(msgButtonClick)
+            returnValue = msgBox.exec()
+            self.timer_step.stop()
+
+        except:
+            pass
