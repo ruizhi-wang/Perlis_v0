@@ -20,7 +20,7 @@ class Setup(QtWidgets.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Plastique'))
 
-        # File open, file save, and close menu actions
+        # Actions for file open, file save, and close menu actions
         file_open = QtWidgets.QAction('&Open', self)
         file_open.setShortcut('Ctrl+O')
         file_open.setStatusTip('Open file')
@@ -51,20 +51,17 @@ class Setup(QtWidgets.QMainWindow):
         help_menu = main_menu.addMenu('&Help')
         help_menu.addAction(close_action)
 
-        # Populate tool bar
-        return_home = QtWidgets.QAction('Home', self)
-        return_home.triggered.connect(self.main_window)
+        # Tool Bar - Define Actions
+        self.return_home = QtWidgets.QAction('Home', self)
+        self.return_home.triggered.connect(self.main_window)
 
-        open_editor = QtWidgets.QAction('Text editor', self)
-        open_editor.triggered.connect(self.editor)
+        self.open_editor = QtWidgets.QAction('Text editor', self)
+        self.open_editor.triggered.connect(self.editor)
 
+        # Tool Bar - Add Actions to the toolbar
         self.tool_bar = self.addToolBar('Create')
-        self.tool_bar.addAction(return_home)
-        self.tool_bar.addAction(open_editor)
-
-        # Initialize layout for widgets
-        self.layout = QtWidgets.QGridLayout()
-        self.recipeTable = QTableWidget()
+        self.tool_bar.addAction(self.return_home)
+        self.tool_bar.addAction(self.open_editor)
 
         # Setup data
         # self.recipe = {'step_txt': ["base", "base"], 'step_time': ["100", "10"]}
@@ -74,6 +71,24 @@ class Setup(QtWidgets.QMainWindow):
         # self.path = 'path_file'
         self.path = ''
 
+        # Execute main window
+        self.main_window()
+
+    def main_window(self):
+        # Initialize layout for widgets
+        self.layout = QtWidgets.QGridLayout()
+        self.recipeTable = QTableWidget()
+
+        # Create layout
+        self.setCentralWidget(QtWidgets.QWidget(self))
+        self.centralWidget().setLayout(self.layout)
+        self.generate_table()
+
+        # Populate widgets
+        self.widgets()
+        self.display_widgets()
+
+    def widgets(self):
         # UI labels
         self.lbl_description = QtWidgets.QLabel('Description:')
         self.lbl_step_name = QtWidgets.QLabel('Step Name:')
@@ -81,7 +96,7 @@ class Setup(QtWidgets.QMainWindow):
         self.lbl_recipe = QtWidgets.QLabel('Recipe:')
 
         # User text input
-        self.txt_description = QtWidgets.QLineEdit('Test protein affinity')
+        self.txt_description = QtWidgets.QTextEdit('Test protein affinity')
         self.txt_step_name = QtWidgets.QLineEdit('Add protein1')
         self.txt_step_time = QtWidgets.QLineEdit("100")
 
@@ -109,39 +124,29 @@ class Setup(QtWidgets.QMainWindow):
         self.btn_start = QtWidgets.QPushButton("Start Experiment")
         self.btn_start.pressed.connect(self.switch)
 
-        # Execute main window
-        self.main_window()
-
-    def main_window(self):
-        # Initialize
-        self.setCentralWidget(QtWidgets.QWidget(self))
-        self.centralWidget().setLayout(self.layout)
-        self.generate_table()
-
-        # Populate widgets
-        self.display_widgets()
-
     def display_widgets(self):
         # Assign widget locations based on grid layout
 
         # Text labels
         self.layout.addWidget(self.lbl_description, 2, 1)
-        self.layout.addWidget(self.lbl_step_name, 3, 1)
-        self.layout.addWidget(self.lbl_step_time, 4, 1)
-        self.layout.addWidget(self.lbl_recipe, 5, 1)
+        self.layout.addWidget(self.lbl_step_name, 4, 2)
+        self.layout.addWidget(self.lbl_step_time, 4, 3)
+        self.layout.addWidget(self.lbl_recipe, 6, 1)
 
         # Line edits
-        self.layout.addWidget(self.txt_description, 2, 2)
-        self.layout.addWidget(self.txt_step_name, 3, 2)
-        self.layout.addWidget(self.txt_step_time, 4, 2)
+        self.layout.addWidget(self.txt_description, 2, 2, 2, 2)
+        self.layout.addWidget(self.txt_step_name, 5, 2)
+        self.layout.addWidget(self.txt_step_time, 5, 3)
 
         # Buttons
         self.layout.addWidget(self.btn_create_project, 1, 2)
         self.layout.addWidget(self.btn_load_project, 1, 3)
-        self.layout.addWidget(self.btn_step_add, 4, 3)
-        self.layout.addWidget(self.btn_reset_recipe, 5, 3)
-        self.layout.addWidget(self.btn_save, 6, 2)
-        self.layout.addWidget(self.btn_start, 7, 2)
+        self.layout.addWidget(self.btn_step_add, 5, 4)
+        self.layout.addWidget(self.btn_reset_recipe, 6, 4)
+        self.layout.addWidget(self.btn_save, 8, 2)
+        self.layout.addWidget(self.btn_start, 8, 3)
+
+        self.BtnDisable()
 
         self.show()
 
@@ -156,17 +161,26 @@ class Setup(QtWidgets.QMainWindow):
             self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
             row += 1
 
-        self.layout.addWidget(self.recipeTable, 5, 2)
+        self.layout.addWidget(self.recipeTable, 6, 2, 2, 2)
         self.show()
 
         # table selection change
         # self.tableWidget.doubleClicked.connect(self.on_click)
 
     def new(self):
-        description = self.txt_description.text()
+        description = "text"
         file_path = QFileDialog.getSaveFileName(self, 'Save File', os.getenv('HOME'))[0]
-        with open(file_path + '_seq.txt', 'w') as file:
-            file.write(description + '\n')
+
+        # Ruizhi: not clear what it means - commented out for now
+        # with open(file_path + '_seq.txt', 'w') as file:
+        #     file.write(description + '\n')
+        # print(type(file_path))
+        # print("done")
+
+        if file_path == '':
+            return
+        else:
+            self.BtnEnable()
 
         self.path = file_path
 
@@ -234,3 +248,15 @@ class Setup(QtWidgets.QMainWindow):
     def switch(self):
         pass_val = [self.recipe, self.path]
         self.switch_window.emit(pass_val)
+
+    def BtnEnable(self):
+        self.btn_step_add.setEnabled(True)
+        self.btn_reset_recipe.setEnabled(True)
+        self.btn_save.setEnabled(True)
+        self.btn_start.setEnabled(True)
+
+    def BtnDisable(self):
+        self.btn_step_add.setEnabled(False)
+        self.btn_reset_recipe.setEnabled(False)
+        self.btn_save.setEnabled(False)
+        self.btn_start.setEnabled(False)
