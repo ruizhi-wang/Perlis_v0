@@ -124,7 +124,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.txt_note = QtGui.QLineEdit('note')  # Create instance of QLineEdit
         self.btn_note = QtGui.QPushButton('add note')  # Create instance of QPushButton
         self.btn_note.clicked.connect(self.AddNote)  # Call AddNote function at button press
-
         # Save, file and text widgets and connections
         # self.txt_file = QtGui.QLineEdit('file_name')  # Create instance of QLineEdit
         # self.btn_save = QtGui.QPushButton('save')  # Create instance of QPushButton
@@ -298,7 +297,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print('Update Data could not be read correctly')
 
         if self.save_state:
-            if time_true - self.save_timer > 5:
+            if time_true - self.save_timer > 1:
                 self.Save()
 
     # Communicate with Arduino to receive data
@@ -388,6 +387,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Stop time
         # Stop global timer
         self.timer.stop()
+        self.save_state = False
 
         # Stop experiment step counter
         try:
@@ -431,7 +431,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Save(self):
         msg = self.path
-
         ar = np.zeros([len(self.data['data1']), 5])
         ar[:,0] = [x[0] for x in self.data['data1']]
         ar[:,1] = [x[2] for x in self.data['data1']]
@@ -439,13 +438,13 @@ class MainWindow(QtWidgets.QMainWindow):
         ar[:,3] = [x[2] for x in self.data['data3']]
         ar[:,4] = [x[2] for x in self.data['data4']]
 
-        with open(msg + 'dummy_data.txt', 'w+') as f:
+        with open(msg + '_data.txt', 'w+') as f:
             np.savetxt(f, ar, fmt=['%f', '%f', '%f', '%f', '%f'])
 
-        # with open(msg+'_notes.txt','w+') as f:
-        #     for note in self.data['notes']:
-        #         #print(str(note[0]) +' : '+ note[2])
-        #         f.write(str(note[0]) +' : '+ note[2]+'\n')
+        # # with open(msg+'_notes.txt','w+') as f:
+        # #     for note in self.data['notes']:
+        # #         #print(str(note[0]) +' : '+ note[2])
+        # #         f.write(str(note[0]) +' : '+ note[2]+'\n')
 
     def ChooseFile(self):
         self.save_file = QtGui.QFileDialog.getSaveFileName()[0]

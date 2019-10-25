@@ -168,14 +168,14 @@ class Setup(QtWidgets.QMainWindow):
         # self.tableWidget.doubleClicked.connect(self.on_click)
 
     def new(self):
-        description = "text"
+        description = "Empty"
+
         file_path = QFileDialog.getSaveFileName(self, 'Save File', os.getenv('HOME'))[0]
 
-        # Ruizhi: not clear what it means - commented out for now
-        # with open(file_path + '_seq.txt', 'w') as file:
-        #     file.write(description + '\n')
-        # print(type(file_path))
-        # print("done")
+        filename_recipe=file_path+"_recipe.txt"
+
+        with open(filename_recipe, "w") as file:
+            file.write(description + '\n')
 
         if file_path == '':
             return
@@ -183,6 +183,20 @@ class Setup(QtWidgets.QMainWindow):
             self.BtnEnable()
 
         self.path = file_path
+
+    def file_save(self):
+        try:
+            file_path = self.path
+            description = self.txt_description.toPlainText()
+            file = open(file_path+"_recipe.txt", 'w+')
+
+            file.write(description + '\n\n')
+
+            for i in range(len(self.recipe['step_txt'])):
+                file.write(self.recipe['step_txt'][i] + ' : ' + self.recipe['step_time'][i] + '\n')
+        except:
+            print('File save error')
+
 
     def load(self):
         try:
@@ -218,20 +232,6 @@ class Setup(QtWidgets.QMainWindow):
     def reset(self):
         self.recipe = {'step_txt': [], 'step_time': []}
         self.generate_table()
-
-    def file_save(self):
-        try:
-            file_path = self.path
-            description = self.txt_description.text()
-            print(file_path)
-            file = open(file_path, 'w+')
-
-            file.write(description + '\n\n')
-
-            for i in range(len(self.recipe['step_txt'])):
-                file.write(self.recipe['step_txt'][i] + ' : ' + self.recipe['step_time'][i] + '\n')
-        except:
-            print('File save error')
 
     def editor(self):
         self.textEdit = QtWidgets.QTextEdit()
