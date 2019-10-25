@@ -202,10 +202,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def timer_countdown_counter(self):
         # Timer to keep track of time passed for each period
-        self.timer_experiment = QtCore.QTimer()
-        self.timer_experiment.setInterval(1000)
-        self.timer_experiment.timeout.connect(self.recurring_timer)
-        self.timer_experiment.start()
+        self.timer_countdown = QtCore.QTimer()
+        self.timer_countdown.setInterval(1000)
+        self.timer_countdown.timeout.connect(self.recurring_timer)
+        self.timer_countdown.start()
 
     def timer_step_counter(self):
         self.timer_step = QtCore.QTimer()
@@ -227,10 +227,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer_countdown_counter()
             # Get index of current step
             self.counter = int(self.experiment_steps["step_time"][self.step_tracker])
+
             self.timer_step_counter()
+
+
         else:
             self.timer_countdown_counter()
-            self.timer_experiment.stop()
+            self.timer_countdown.stop()
             self.current_time_counter.setText("Time remaining: Experiment over")
 
         # Display information about the correct step
@@ -388,7 +391,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Stop experiment step counter
         try:
-            self.timer_experiment.stop()
+            self.timer_countdown.stop()
         except:
             pass
 
@@ -494,17 +497,38 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def PopUpStep(self):
         try:
-            text_message = "Step PopUp"
+            # Stop timer, which is counting down the time until the next popup with a command
+            self.timer_step.stop()
 
+            current_step = self.step_tracker
+
+            # Define text in message box
             msgBox = QMessageBox()
             msgBox.setIcon(QMessageBox.Information)
-            current_step=self.step_tracker
-            msgBox.setText(str(self.experiment_steps["step_txt"][current_step]))
-            msgBox.setWindowTitle("QMessageBox Example")
+            # For some weird reason, but the time self.step_tracker has been passed in, it has already increased by 1
+            if current_step < len(self.experiment_steps["step_time"]):
+                msgBox.setText(str(self.experiment_steps["step_txt"][current_step]))
+
+            if current_step == len(self.experiment_steps["step_time"]):
+                msgBox.setText("Done with the experiment!")
+
             msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-            # msgBox.buttonClicked.connect(msgButtonClick)
+
+
             returnValue = msgBox.exec()
-            self.timer_step.stop()
+            if returnValue == QMessageBox.Ok:
+                self.StepExperiment()
 
         except:
             pass
+
+    def PopUpEnd(self):
+        text_message = "End of experiment"
+
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText(text_message)
+        msgBox.setWindowTitle("QMessageBox Example")
+        msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        # msgBox.buttonClicked.connect(msgButtonClick)
+        returnValue = msgBox.exec()
