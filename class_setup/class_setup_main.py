@@ -9,7 +9,8 @@ class Setup(QtWidgets.QMainWindow):
     Class that defines setup window in reader UI.
     """
     # Define switch window as a type of pyqtSignal, i.e., once activated the window will be switched
-    switch_window = QtCore.pyqtSignal(list)
+    switch_mainwindow = QtCore.pyqtSignal(list)
+    switch_testwindow = QtCore.pyqtSignal()
 
     def __init__(self):
         super(Setup, self).__init__()
@@ -51,17 +52,26 @@ class Setup(QtWidgets.QMainWindow):
         help_menu = main_menu.addMenu('&Help')
         help_menu.addAction(close_action)
 
+        # Create tool bar
+        self.toolBar = self.addToolBar('Create')
+
         # Tool Bar - Define Actions
         self.return_home = QtWidgets.QAction('Home', self)
         self.return_home.triggered.connect(self.main_window)
+        self.toolBar.addAction(self.return_home)
 
         self.open_editor = QtWidgets.QAction('Text editor', self)
         self.open_editor.triggered.connect(self.editor)
+        self.toolBar.addAction(self.open_editor)
 
-        # Tool Bar - Add Actions to the toolbar
-        self.tool_bar = self.addToolBar('Create')
-        self.tool_bar.addAction(self.return_home)
-        self.tool_bar.addAction(self.open_editor)
+        self.closeWindow = QtWidgets.QAction('Close', self)
+        self.closeWindow.setShortcut('Ctrl+W')
+        self.closeWindow.setStatusTip('Quit app')
+        self.closeWindow.triggered.connect(self.close_app)
+        self.toolBar.addAction(self.closeWindow)
+
+
+
 
         # Setup data
         # self.recipe = {'step_txt': ["base", "base"], 'step_time': ["100", "10"]}
@@ -108,6 +118,10 @@ class Setup(QtWidgets.QMainWindow):
         self.btn_load_project = QtWidgets.QPushButton('Load')
         self.btn_load_project.clicked.connect(self.load)
 
+        # Freestyle experiment
+        self.btn_test = QtWidgets.QPushButton('Test Experiment')
+        self.btn_test.clicked.connect(self.SwitchTest)
+
         # Add step
         self.btn_step_add = QtWidgets.QPushButton('Add')
         self.btn_step_add.clicked.connect(self.add)
@@ -122,7 +136,7 @@ class Setup(QtWidgets.QMainWindow):
 
         # Go to next window
         self.btn_start = QtWidgets.QPushButton("Start Experiment")
-        self.btn_start.pressed.connect(self.switch)
+        self.btn_start.pressed.connect(self.SwitchMain)
 
     def display_widgets(self):
         # Assign widget locations based on grid layout
@@ -141,6 +155,7 @@ class Setup(QtWidgets.QMainWindow):
         # Buttons
         self.layout.addWidget(self.btn_create_project, 1, 2)
         self.layout.addWidget(self.btn_load_project, 1, 3)
+        self.layout.addWidget(self.btn_test, 1, 4)
         self.layout.addWidget(self.btn_step_add, 5, 4)
         self.layout.addWidget(self.btn_reset_recipe, 6, 4)
         self.layout.addWidget(self.btn_save, 8, 2)
@@ -216,6 +231,7 @@ class Setup(QtWidgets.QMainWindow):
 
             self.generate_table()
             self.path = file_path
+            self.BtnEnable()
         except:
             print('Load file error')
 
@@ -245,9 +261,12 @@ class Setup(QtWidgets.QMainWindow):
         else:
             pass
 
-    def switch(self):
+    def SwitchMain(self):
         pass_val = [self.recipe, self.path]
-        self.switch_window.emit(pass_val)
+        self.switch_mainwindow.emit(pass_val)
+
+    def SwitchTest(self):
+        self.switch_testwindow.emit()
 
     def BtnEnable(self):
         self.btn_step_add.setEnabled(True)
