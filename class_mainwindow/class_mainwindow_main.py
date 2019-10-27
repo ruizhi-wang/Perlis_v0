@@ -103,11 +103,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Operating the experiment
         self.btn_start = QtGui.QPushButton('start')  # Create instance of QPushButton
-        self.btn_start.clicked.connect(self.StartRecording)  # Call StartRecording function when start button pressed
-        self.btn_start.pressed.connect(self.StepExperiment)  # Trigger first step in experiment
+        self.btn_start.pressed.connect(self.PopUpStart)  # Activate warning about experiment erased
         self.btn_stop = QtGui.QPushButton('stop')
         self.btn_stop.clicked.connect(self.StopRecording)  # Call StopRecording function at button press
-        self.btn_reset = QtGui.QPushButton('Reset')
+        self.btn_reset = QtGui.QPushButton('reset')
         self.btn_reset.clicked.connect(self.Reset)  # Call Reset function at button press
 
         # Label showing the experimental steps
@@ -258,9 +257,10 @@ class MainWindow(QtWidgets.QMainWindow):
     # Communicate with Arduino to receive data
     def UpdateData(self):
         time_true = time.time() - self.time_start_true
-
-        # Hotfix for start data since begining
+        # Hotfix for start data since pressing the "start" button
         time_sincestart = time.time() - self.time_start_true
+
+
         try:
             # XXXX
             # self.ard.write(b'1')
@@ -387,6 +387,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # Stop time
         # Stop global timer
         self.timer.stop()
+        # Stop popup timer
+        self.timer_step.stop()
+        # Stop countdown timer
+        self.timer_countdown.stop()
+
         self.save_state = False
 
         # Stop experiment step counter
@@ -418,6 +423,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def StopRecording(self):
         self.timer.stop()
+        # Stop popup timer
+        self.timer_step.stop()
+        # Stop countdown timer
+        self.timer_countdown.stop()
 
     def AddNote(self):
         msg = self.txt_note.text()
@@ -531,3 +540,18 @@ class MainWindow(QtWidgets.QMainWindow):
         msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         # msgBox.buttonClicked.connect(msgButtonClick)
         returnValue = msgBox.exec()
+
+    def PopUpStart(self):
+        text_message = "Start Experiment - All previous data will be erased"
+
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText(text_message)
+        msgBox.setWindowTitle("QMessageBox Example")
+        msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        # msgBox.buttonClicked.connect(msgButtonClick)
+        returnValue = msgBox.exec()
+
+        if returnValue == QMessageBox.Ok:
+            self.StartRecording() # Call StartRecording function when ok button pressed
+            self.StepExperiment() # Trigger first step in experiment
