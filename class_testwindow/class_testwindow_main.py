@@ -8,12 +8,12 @@ import time
 
 class TestWindow(QtWidgets.QMainWindow):
 
-    switch_setupwindow = QtCore.pyqtSignal()
+    switch_landingwindow = QtCore.pyqtSignal()
 
     def __init__(self):
         super(TestWindow, self).__init__()
 
-        self.setGeometry(50, 50, 600, 800)
+        self.setGeometry(50, 50, 800, 600)
 
         self.setWindowTitle('HexagonFab Test Experiment')
         self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
@@ -435,7 +435,7 @@ class TestWindow(QtWidgets.QMainWindow):
         self.data['notes'].append([time_true, time_sincestart, msg])
 
     def switch(self):
-        self.switch_setupwindow.emit()
+        self.switch_landingwindow.emit()
 
     # -------------------------------------------------------------------------------------------------------------------
     # Arduino communication

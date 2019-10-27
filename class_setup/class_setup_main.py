@@ -11,6 +11,7 @@ class Setup(QtWidgets.QMainWindow):
     # Define switch window as a type of pyqtSignal, i.e., once activated the window will be switched
     switch_mainwindow = QtCore.pyqtSignal(list)
     switch_testwindow = QtCore.pyqtSignal()
+    switch_landingwindow = QtCore.pyqtSignal()
 
     def __init__(self):
         super(Setup, self).__init__()
@@ -57,7 +58,7 @@ class Setup(QtWidgets.QMainWindow):
 
         # Tool Bar - Define Actions
         self.return_home = QtWidgets.QAction('Home', self)
-        self.return_home.triggered.connect(self.main_window)
+        self.return_home.triggered.connect(self.SwitchLanding)
         self.toolBar.addAction(self.return_home)
 
         self.open_editor = QtWidgets.QAction('Text editor', self)
@@ -267,6 +268,9 @@ class Setup(QtWidgets.QMainWindow):
 
     def SwitchTest(self):
         self.switch_testwindow.emit()
+
+    def SwitchLanding(self):
+        self.switch_landingwindow.emit()
 
     def BtnEnable(self):
         self.btn_step_add.setEnabled(True)
