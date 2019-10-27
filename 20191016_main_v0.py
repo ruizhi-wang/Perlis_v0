@@ -9,7 +9,6 @@ from class_mainwindow import class_mainwindow_main
 from class_testwindow import class_testwindow_main
 
 # Comment to test if git works
-# GitHub makes me sad
 
 
 # Define controller to act
