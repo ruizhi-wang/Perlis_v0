@@ -42,5 +42,6 @@ print("a \nb")
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import time
 
-time=QtCore.QTimer()
+print(time.time())

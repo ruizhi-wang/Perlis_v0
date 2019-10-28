@@ -109,9 +109,6 @@ class ReadOut:
         self.l5 = self.plot.plot(pen=pg.mkPen('b', width=3, style=QtCore.Qt.DashLine))
         self.l6 = self.plot.plot(pen=pg.mkPen('w', width=3, style=QtCore.Qt.DashLine))
 
-
-
-
     def AddWidgets(self):
         # Build all widgets and set locations
         self.lo.addWidget(self.btn_start, 1, 3)
