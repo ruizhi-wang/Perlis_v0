@@ -18,7 +18,7 @@ class LandingWindow(QtWidgets.QMainWindow):
         # Dimensions and style of the window
         self.setGeometry(50, 50, 100, 100)
         self.setWindowTitle('HexagonFab Landing')
-        self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
+        self.setWindowIcon(QtGui.QIcon('HexagonFab_RGB.jpg'))
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Plastique'))
 
         # Actions for file open, file save, and close menu actions
