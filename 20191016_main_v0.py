@@ -9,7 +9,7 @@ from class_setup import class_setup_main
 from class_mainwindow import class_mainwindow_main
 from class_testwindow import class_testwindow_main
 
-# Comment to test if git works
+# Minor edit
 
 
 # Define controller to act
