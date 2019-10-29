@@ -7,6 +7,7 @@ import serial
 import time
 
 # Comment to check
+# Another comment to check
 
 class MainWindow(QtWidgets.QMainWindow):
 
