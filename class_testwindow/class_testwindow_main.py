@@ -6,18 +6,16 @@ import numpy as np
 import serial
 import time
 
-# Comment to check
-
-class MainWindow(QtWidgets.QMainWindow):
+class TestWindow(QtWidgets.QMainWindow):
 
     switch_landingwindow = QtCore.pyqtSignal()
 
-    def __init__(self, pass_value):
-        super(MainWindow, self).__init__()
+    def __init__(self):
+        super(TestWindow, self).__init__()
 
         self.setGeometry(50, 50, 800, 600)
 
-        self.setWindowTitle('HexagonFab Recipe Experiment')
+        self.setWindowTitle('HexagonFab Test Experiment')
         self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
 
         #--------------------------------------------------------------------------------------------------------------
@@ -27,8 +25,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # Initialize step counter
         self.step_tracker = 0
         # Load values in form arguments
-        self.experiment_steps = pass_value[0]
-        self.path = pass_value[1]
+        self.experiment_steps = ""
+        self.path = ""
         
         # Set go_state to False to prevent data being written
         self.go_state = False  # Create class variables (i.e. go_state) and set it to           
@@ -98,26 +96,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_reset = QtGui.QPushButton('reset')
         self.btn_reset.clicked.connect(self.PopUpReset)  # Call Reset function at button press
 
-        # Label showing the experimental steps
-        self.current_time_counter = QtWidgets.QLabel("Waiting to start experiment")
-        self.duration_counter = QtWidgets.QLabel()
-        self.step_counter = QtWidgets.QLabel()
-        self.duration_next = QtWidgets.QLabel()
-        self.step_next = QtWidgets.QLabel()
-
-        # Buttons to navigate the experiments
-        self.btn_experiment = QtWidgets.QPushButton("next")
-        self.btn_experiment.pressed.connect(self.StepExperiment) # Trigger next step in experimetn
         # Note text and connection
         self.txt_note = QtGui.QLineEdit('note')  # Create instance of QLineEdit
         self.btn_note = QtGui.QPushButton('add note')  # Create instance of QPushButton
         self.btn_note.clicked.connect(self.AddNote)  # Call AddNote function at button press
+
         # Save, file and text widgets and connections
-        # self.txt_file = QtGui.QLineEdit('file_name')  # Create instance of QLineEdit
-        # self.btn_save = QtGui.QPushButton('save')  # Create instance of QPushButton
-        # self.btn_save.clicked.connect(self.Save)  # Call Save function at button press
-        # self.btn_file = QtGui.QPushButton('file...')  # Create instance of QPushButton
-        # self.btn_file.clicked.connect(self.ChooseFile)  # Call ChooseFile function at button press
+        self.txt_file = QtGui.QLineEdit('file_name')  # Create instance of QLineEdit
+        self.btn_save = QtGui.QPushButton('save')  # Create instance of QPushButton
+        self.btn_save.clicked.connect(self.Save)  # Call Save function at button press
+        self.btn_file = QtGui.QPushButton('file...')  # Create instance of QPushButton
+        self.btn_file.clicked.connect(self.ChooseFile)  # Call ChooseFile function at button press
 
         # What - data widgets
         self.data_select1 = QtGui.QCheckBox('Sensor1')  # Create instance of QCheckBox
@@ -164,24 +153,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.com_select, 1, 1)
         self.layout.addWidget(self.com_label, 1, 0)
 
-        # self.layout.addWidget(self.btn_note, 1, 1)
-        # self.layout.addWidget(self.btn_note, 2, 1)
-        # self.layout.addWidget(self.txt_note, 2, 0)
-        # layout.addWidget(listw, 3, 0)
         self.layout.addWidget(self.plot, 3, 0, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
-        # self.layout.addWidget(self.btn_file, 4, 2)
-        # self.layout.addWidget(self.txt_file, 4, 0, 1, 2)
-        # self.layout.addWidget(self.btn_save, 4, 3)
-        # --------------------------------------------
-
-        # Assign widget locations based on grid layout
-        self.layout.addWidget(self.current_time_counter, 6, 1)
-        self.layout.addWidget(self.duration_counter, 5, 1)
-        self.layout.addWidget(self.step_counter, 5, 2)
-        self.layout.addWidget(self.duration_next, 7, 1)
-        self.layout.addWidget(self.step_next, 7, 2)
-        self.layout.addWidget(self.btn_experiment, 8, 1)
+        self.layout.addWidget(self.btn_note, 7, 2)
+        self.layout.addWidget(self.txt_note, 7, 0, 1, 2)
+        self.layout.addWidget(self.btn_file, 8, 2)
+        self.layout.addWidget(self.txt_file, 8, 0, 1, 2)
+        self.layout.addWidget(self.btn_save, 8, 3)
 
         self.BtnDisable()
 
@@ -403,13 +381,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer.stop()
         except:
             pass
-        try:
-            # Stop popup timer
-            self.timer_step.stop()
-            # Stop countdown timer
-            self.timer_countdown.stop()
-        except:
-            pass
 
         # Close port
         try:
@@ -432,19 +403,17 @@ class MainWindow(QtWidgets.QMainWindow):
         # Reset recipe
         self.step_tracker = 0  # Set step tracker to 0 to run recipe from start
 
-        self.current_time_counter.setText("Waiting for start of experiment")
-        self.duration_counter.setText("")
-        self.step_counter.setText("")
-        self.duration_next.setText("")
-        self.step_next.setText("")
-
         # Disable all buttons except connect
         self.BtnDisable()
 
         print("reset performed")
+
+    def ChooseFile(self):
+        self.save_file = QtGui.QFileDialog.getSaveFileName()[0]
+        self.txt_file.setText(self.save_file)
     
     def Save(self):
-        msg = self.path
+        msg = self.txt_file.text()
         ar = np.zeros([len(self.data['data1']),5])
         ar[:,0] = [x[0] for x in self.data['data1']]
         ar[:,1] = [x[2] for x in self.data['data1']]
@@ -594,10 +563,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_start.setEnabled(True)
         self.btn_stop.setEnabled(True)
         self.btn_reset.setEnabled(True)
-        self.btn_experiment.setEnabled(True)
+        self.btn_note.setEnabled(True)
+        self.btn_save.setEnabled(True)
 
     def BtnDisable(self):
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(False)
         self.btn_reset.setEnabled(False)
-        self.btn_experiment.setEnabled(False)
+        self.btn_note.setEnabled(False)
+        self.btn_save.setEnabled(False)
