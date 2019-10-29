@@ -21,35 +21,6 @@ class LandingWindow(QtWidgets.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('HexagonFab_RGB.jpg'))
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Plastique'))
 
-        # Actions for file open, file save, and close menu actions
-        file_open = QtWidgets.QAction('&Open', self)
-        file_open.setShortcut('Ctrl+O')
-        file_open.setStatusTip('Open file')
-
-        file_save = QtWidgets.QAction('&Save', self)
-        file_save.setShortcut('Ctrl+S')
-        file_save.setStatusTip('Save file')
-
-        close_action = QtWidgets.QAction('&Close', self)
-        close_action.setShortcut('Ctrl+W')
-        close_action.setStatusTip('Quit app')
-        close_action.triggered.connect(self.close_app)
-
-        self.statusBar()
-
-        # Generate main menu items
-        main_menu = self.menuBar()
-        file_menu = main_menu.addMenu('&File')
-        file_menu.addAction(file_open)
-        file_menu.addAction(file_save)
-        file_menu.addAction(close_action)
-
-        options_menu = main_menu.addMenu('&Options')
-        options_menu.addAction(close_action)
-
-        help_menu = main_menu.addMenu('&Help')
-        help_menu.addAction(close_action)
-
         # Create tool bar
         self.toolBar = self.addToolBar('Create')
 
