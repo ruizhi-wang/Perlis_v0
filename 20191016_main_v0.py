@@ -9,13 +9,16 @@ from class_setup import class_setup_main
 from class_mainwindow import class_mainwindow_main
 from class_testwindow import class_testwindow_main
 
-# Comment to test if git works
+# Import style packages
+import qtmodern.styles
+import qtmodern.windows
 
 
 # Define controller to act
-class Controller:
+class Controller(QtWidgets.QMainWindow):
 
     def __init__(self):
+        super(Controller, self).__init__()
         pass
 
     def show_landing(self):
@@ -67,8 +70,11 @@ class Controller:
 # Run code
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    qtmodern.styles.dark(app)
     controller = Controller()
     controller.show_landing()
+    # mw = qtmodern.windows.ModernWindow(controller)
+    # mw.show()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':

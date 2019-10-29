@@ -1,7 +1,7 @@
 import os
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog, QHeaderView
 
 
 class Setup(QtWidgets.QMainWindow):
@@ -71,9 +71,6 @@ class Setup(QtWidgets.QMainWindow):
         self.closeWindow.triggered.connect(self.close_app)
         self.toolBar.addAction(self.closeWindow)
 
-
-
-
         # Setup data
         # self.recipe = {'step_txt': ["base", "base"], 'step_time': ["100", "10"]}
         self.recipe = {'step_txt': [], 'step_time': []}
@@ -88,6 +85,7 @@ class Setup(QtWidgets.QMainWindow):
     def main_window(self):
         # Initialize layout for widgets
         self.layout = QtWidgets.QGridLayout()
+        # self.layout.setRowStretch(6, 10)
         self.recipeTable = QTableWidget()
 
         # Create layout
@@ -168,9 +166,17 @@ class Setup(QtWidgets.QMainWindow):
 
     def generate_table(self):
         # Create table
+        self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
         self.recipeTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.recipeTable.setRowCount(len(self.recipe['step_txt']))
         self.recipeTable.setColumnCount(2)
+        self.recipeTable.setRowCount(5)
+
+        self.recipeTable.setHorizontalHeaderLabels(['Step Name', 'Time'])
+        # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
+        header = self.recipeTable.horizontalHeader()
+        header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
         for row in range(len(self.recipe['step_txt'])):
             self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))

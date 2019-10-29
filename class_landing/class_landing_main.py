@@ -87,7 +87,8 @@ class LandingWindow(QtWidgets.QMainWindow):
     def widgets(self):
 
         # Create new recipe file
-        self.btn_create_project = QtWidgets.QPushButton('Recipe Experiment')
+        self.btn_create_project = QtWidgets.QPushButton('Create new experiment')
+        self.btn_create_project.setStyleSheet("background-color: blue")
         self.btn_create_project.clicked.connect(self.SwitchSetup)
 
         # Freestyle experiment
@@ -96,8 +97,8 @@ class LandingWindow(QtWidgets.QMainWindow):
 
     def display_widgets(self):
         # Buttons
-        self.layout.addWidget(self.btn_create_project, 1, 2)
-        self.layout.addWidget(self.btn_test, 1, 4)
+        self.layout.addWidget(self.btn_create_project, 1, 1)
+        self.layout.addWidget(self.btn_test, 2, 1)
 
         self.show()
 
