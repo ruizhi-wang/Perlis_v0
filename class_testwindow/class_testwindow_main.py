@@ -424,12 +424,18 @@ class TestWindow(QtWidgets.QMainWindow):
         with open(msg+'_data.txt','w+') as f:
             np.savetxt(f,ar,fmt=['%f','%f','%f','%f','%f'])
 
+        with open(msg+'_notes.txt','w+') as f:
+            for note in self.data['notes']:
+                f.write(str(note[0]) +' : '+ note[2]+'\n')
+
     def AddNote(self):
-        msg = self.txt_note.text()
-        time_true = time.time() - self.time_start_true
+        msg = self.path
+
         try:
+            time_true = time.time() - self.time_start_true
             time_sincestart = time.time() - self.time_start
         except:
+            time_true = 0
             time_sincestart = 0
 
         self.data['notes'].append([time_true, time_sincestart, msg])

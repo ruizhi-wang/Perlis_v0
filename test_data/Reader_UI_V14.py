@@ -246,10 +246,11 @@ class ReadOut:
 
     def AddNote(self):
         msg = self.txt_note.text()
-        time_true = time.time() - self.time_start_true
         try:
+            time_true = time.time() - self.time_start_true
             time_sincestart = time.time() - self.time_start
         except:
+            time_true=0
             time_sincestart=0
 
         self.data['notes'].append([time_true,time_sincestart,msg])

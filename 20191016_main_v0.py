@@ -9,9 +9,9 @@ from class_setup import class_setup_main
 from class_mainwindow import class_mainwindow_main
 from class_testwindow import class_testwindow_main
 
-# Import style packages
 import qtmodern.styles
 import qtmodern.windows
+
 
 
 # Define controller to act
@@ -51,13 +51,13 @@ class Controller(QtWidgets.QMainWindow):
         # Code to call main window
         self.setup.switch_landingwindow.connect(self.show_landing)
         self.setup.switch_mainwindow.connect(self.show_main)
-        self.setup.switch_testwindow.connect(self.show_test)
         self.setup.show()
 
     def show_main(self, pass_value):
         self.main_window = class_mainwindow_main.MainWindow(pass_value)
         self.setup.close()
         self.main_window.switch_landingwindow.connect(self.show_landing)
+        self.main_window.switch_setupwindow.connect(self.show_setup)
         self.main_window.show()
 
     def show_test(self):

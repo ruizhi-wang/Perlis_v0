@@ -1,7 +1,8 @@
 import os
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog, QHeaderView
+
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog, QHeaderView, QMessageBox
 
 
 class Setup(QtWidgets.QMainWindow):
@@ -10,48 +11,16 @@ class Setup(QtWidgets.QMainWindow):
     """
     # Define switch window as a type of pyqtSignal, i.e., once activated the window will be switched
     switch_mainwindow = QtCore.pyqtSignal(list)
-    switch_testwindow = QtCore.pyqtSignal()
     switch_landingwindow = QtCore.pyqtSignal()
 
     def __init__(self):
         super(Setup, self).__init__()
 
         # Dimensions and style of the window
-        self.setGeometry(50, 50, 600, 300)
+        self.setGeometry(50, 50, 600, 400)
         self.setWindowTitle('HexagonFab Experiment Setup')
         self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Plastique'))
-
-        # Actions for file open, file save, and close menu actions
-        file_open = QtWidgets.QAction('&Open', self)
-        file_open.setShortcut('Ctrl+O')
-        file_open.setStatusTip('Open file')
-        file_open.triggered.connect(self.load)
-
-        file_save = QtWidgets.QAction('&Save', self)
-        file_save.setShortcut('Ctrl+S')
-        file_save.setStatusTip('Save file')
-        file_save.triggered.connect(self.file_save)
-
-        close_action = QtWidgets.QAction('&Close', self)
-        close_action.setShortcut('Ctrl+W')
-        close_action.setStatusTip('Quit app')
-        close_action.triggered.connect(self.close_app)
-
-        self.statusBar()
-
-        # Generate main menu items
-        main_menu = self.menuBar()
-        file_menu = main_menu.addMenu('&File')
-        file_menu.addAction(file_open)
-        file_menu.addAction(file_save)
-        file_menu.addAction(close_action)
-
-        options_menu = main_menu.addMenu('&Options')
-        options_menu.addAction(close_action)
-
-        help_menu = main_menu.addMenu('&Help')
-        help_menu.addAction(close_action)
 
         # Create tool bar
         self.toolBar = self.addToolBar('Create')
@@ -105,7 +74,7 @@ class Setup(QtWidgets.QMainWindow):
         self.lbl_recipe = QtWidgets.QLabel('Recipe:')
 
         # User text input
-        self.txt_description = QtWidgets.QTextEdit('Test protein affinity')
+        self.txt_description = QtWidgets.QTextEdit('Add a description for the recipe')
         self.txt_step_name = QtWidgets.QLineEdit('Add protein1')
         self.txt_step_time = QtWidgets.QLineEdit("100")
 
@@ -117,25 +86,21 @@ class Setup(QtWidgets.QMainWindow):
         self.btn_load_project = QtWidgets.QPushButton('Load')
         self.btn_load_project.clicked.connect(self.load)
 
-        # Freestyle experiment
-        self.btn_test = QtWidgets.QPushButton('Test Experiment')
-        self.btn_test.clicked.connect(self.SwitchTest)
-
         # Add step
         self.btn_step_add = QtWidgets.QPushButton('Add')
         self.btn_step_add.clicked.connect(self.add)
 
         # Reset
         self.btn_reset_recipe = QtWidgets.QPushButton('Reset')
-        self.btn_reset_recipe.clicked.connect(self.reset)
+        self.btn_reset_recipe.clicked.connect(self.PopUpReset)
 
         # Save
         self.btn_save = QtWidgets.QPushButton('Save')
         self.btn_save.clicked.connect(self.file_save)
 
         # Go to next window
-        self.btn_start = QtWidgets.QPushButton("Start Experiment")
-        self.btn_start.pressed.connect(self.SwitchMain)
+        self.btn_start = QtWidgets.QPushButton("Run Recipe")
+        self.btn_start.pressed.connect(self.PopUpRun)
 
     def display_widgets(self):
         # Assign widget locations based on grid layout
@@ -154,7 +119,6 @@ class Setup(QtWidgets.QMainWindow):
         # Buttons
         self.layout.addWidget(self.btn_create_project, 1, 2)
         self.layout.addWidget(self.btn_load_project, 1, 3)
-        self.layout.addWidget(self.btn_test, 1, 4)
         self.layout.addWidget(self.btn_step_add, 5, 4)
         self.layout.addWidget(self.btn_reset_recipe, 6, 4)
         self.layout.addWidget(self.btn_save, 8, 2)
@@ -252,10 +216,6 @@ class Setup(QtWidgets.QMainWindow):
 
         self.generate_table()
 
-    def reset(self):
-        self.recipe = {'step_txt': [], 'step_time': []}
-        self.generate_table()
-
     def editor(self):
         self.textEdit = QtWidgets.QTextEdit()
         self.setCentralWidget(self.textEdit)
@@ -272,9 +232,6 @@ class Setup(QtWidgets.QMainWindow):
         pass_val = [self.recipe, self.path]
         self.switch_mainwindow.emit(pass_val)
 
-    def SwitchTest(self):
-        self.switch_testwindow.emit()
-
     def SwitchLanding(self):
         self.switch_landingwindow.emit()
 
@@ -289,3 +246,30 @@ class Setup(QtWidgets.QMainWindow):
         self.btn_reset_recipe.setEnabled(False)
         self.btn_save.setEnabled(False)
         self.btn_start.setEnabled(False)
+
+    def PopUpReset(self):
+        choice = QtWidgets.QMessageBox.question(self, 'Reset', 'Are you sure you wish to reset the recipe?',
+                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        if choice == QtWidgets.QMessageBox.Yes:
+            self.recipe = {'step_txt': [], 'step_time': []}
+            self.generate_table()
+        else:
+            pass
+
+    def PopUpRun(self):
+        text_message = "Set up experiment with the current recipe? \n (You will be asked to connect the sensor in the next step)"
+
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText(text_message)
+        msgBox.setWindowTitle("QMessageBox Example")
+        msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+        returnValue = msgBox.exec()
+
+        if returnValue == QMessageBox.Ok:
+            self.file_save()
+            self.SwitchMain()
+        else:
+            pass
+
