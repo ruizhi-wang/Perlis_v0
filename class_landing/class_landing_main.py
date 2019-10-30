@@ -18,37 +18,8 @@ class LandingWindow(QtWidgets.QMainWindow):
         # Dimensions and style of the window
         self.setGeometry(50, 50, 100, 100)
         self.setWindowTitle('HexagonFab Landing')
-        self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
+        self.setWindowIcon(QtGui.QIcon('HexagonFab_RGB.jpg'))
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Plastique'))
-
-        # Actions for file open, file save, and close menu actions
-        file_open = QtWidgets.QAction('&Open', self)
-        file_open.setShortcut('Ctrl+O')
-        file_open.setStatusTip('Open file')
-
-        file_save = QtWidgets.QAction('&Save', self)
-        file_save.setShortcut('Ctrl+S')
-        file_save.setStatusTip('Save file')
-
-        close_action = QtWidgets.QAction('&Close', self)
-        close_action.setShortcut('Ctrl+W')
-        close_action.setStatusTip('Quit app')
-        close_action.triggered.connect(self.close_app)
-
-        self.statusBar()
-
-        # Generate main menu items
-        main_menu = self.menuBar()
-        file_menu = main_menu.addMenu('&File')
-        file_menu.addAction(file_open)
-        file_menu.addAction(file_save)
-        file_menu.addAction(close_action)
-
-        options_menu = main_menu.addMenu('&Options')
-        options_menu.addAction(close_action)
-
-        help_menu = main_menu.addMenu('&Help')
-        help_menu.addAction(close_action)
 
         # Create tool bar
         self.toolBar = self.addToolBar('Create')
@@ -87,7 +58,8 @@ class LandingWindow(QtWidgets.QMainWindow):
     def widgets(self):
 
         # Create new recipe file
-        self.btn_create_project = QtWidgets.QPushButton('Recipe Experiment')
+        self.btn_create_project = QtWidgets.QPushButton('Create new experiment')
+        self.btn_create_project.setStyleSheet("background-color: blue")
         self.btn_create_project.clicked.connect(self.SwitchSetup)
 
         # Freestyle experiment
@@ -96,8 +68,8 @@ class LandingWindow(QtWidgets.QMainWindow):
 
     def display_widgets(self):
         # Buttons
-        self.layout.addWidget(self.btn_create_project, 1, 2)
-        self.layout.addWidget(self.btn_test, 1, 4)
+        self.layout.addWidget(self.btn_create_project, 1, 1)
+        self.layout.addWidget(self.btn_test, 2, 1)
 
         self.show()
 

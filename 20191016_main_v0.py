@@ -7,34 +7,50 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from class_setup import class_setup_main
 from class_mainwindow import class_mainwindow_main
 
-# Comment to test if git works
-# GitHub makes me sad
+import qtmodern.styles
+import qtmodern.windows
+
 
 
 # Define controller to act
-class Controller:
+class Controller(QtWidgets.QMainWindow):
 
     def __init__(self):
+        super(Controller, self).__init__()
         pass
 
     def show_setup(self):
         # Call first setup window
         self.setup = class_setup_main.Setup()
         # Code to call main window
-        self.setup.switch_window.connect(self.show_main)
+        self.setup.switch_landingwindow.connect(self.show_landing)
+        self.setup.switch_mainwindow.connect(self.show_main)
         self.setup.show()
 
     def show_main(self, pass_value):
         self.window = class_mainwindow_main.MainWindow(pass_value)
         self.setup.close()
-        self.window.show()
+        self.main_window.switch_landingwindow.connect(self.show_landing)
+        self.main_window.switch_setupwindow.connect(self.show_setup)
+        self.main_window.show()
+
+    def show_test(self):
+        self.test_window = class_testwindow_main.TestWindow()
+        self.landing.close()
+        self.test_window.switch_landingwindow.connect(self.show_landing)
+        self.test_window.show()
+
 
 
 # Run code
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    qtmodern.styles.dark(app)
     controller = Controller()
-    controller.show_setup()
+    controller.show_landing()
+    # mw = qtmodern.windows.ModernWindow(controller)
+    # mw.show()
+
     sys.exit(app.exec_())
 
 if __name__ == '__main__':

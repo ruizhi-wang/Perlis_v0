@@ -6,9 +6,13 @@ import numpy as np
 import serial
 import time
 
+# Comment to check
+# Another comment to check
+
 class MainWindow(QtWidgets.QMainWindow):
 
     switch_landingwindow = QtCore.pyqtSignal()
+    switch_setupwindow = QtCore.pyqtSignal()
 
     def __init__(self, pass_value):
         super(MainWindow, self).__init__()
@@ -51,8 +55,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toolBar = self.addToolBar('Create')
 
         self.returnHome = QtWidgets.QAction('Home', self)
-        self.returnHome.triggered.connect(self.PopUpReturn)
+        self.returnHome.triggered.connect(self.PopUpHome)
         self.toolBar.addAction(self.returnHome)
+
+        self.returnRecipe = QtWidgets.QAction('Recipe Setup', self)
+        self.returnRecipe.triggered.connect(self.PopUpSetup)
+        self.toolBar.addAction(self.returnRecipe)
 
         self.closeWindow = QtWidgets.QAction('Close', self)
         self.closeWindow.triggered.connect(self.PopUpClose)
@@ -110,6 +118,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.txt_note = QtGui.QLineEdit('note')  # Create instance of QLineEdit
         self.btn_note = QtGui.QPushButton('add note')  # Create instance of QPushButton
         self.btn_note.clicked.connect(self.AddNote)  # Call AddNote function at button press
+
         # Save, file and text widgets and connections
         # self.txt_file = QtGui.QLineEdit('file_name')  # Create instance of QLineEdit
         # self.btn_save = QtGui.QPushButton('save')  # Create instance of QPushButton
@@ -162,10 +171,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.com_select, 1, 1)
         self.layout.addWidget(self.com_label, 1, 0)
 
-        # self.layout.addWidget(self.btn_note, 1, 1)
-        # self.layout.addWidget(self.btn_note, 2, 1)
-        # self.layout.addWidget(self.txt_note, 2, 0)
-        # layout.addWidget(listw, 3, 0)
+        self.layout.addWidget(self.txt_note, 8, 1)
+        self.layout.addWidget(self.btn_note, 8, 2)
+
         self.layout.addWidget(self.plot, 3, 0, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
         # self.layout.addWidget(self.btn_file, 4, 2)
@@ -177,9 +185,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.current_time_counter, 6, 1)
         self.layout.addWidget(self.duration_counter, 5, 1)
         self.layout.addWidget(self.step_counter, 5, 2)
+        self.layout.addWidget(self.btn_experiment, 5, 3)
         self.layout.addWidget(self.duration_next, 7, 1)
         self.layout.addWidget(self.step_next, 7, 2)
-        self.layout.addWidget(self.btn_experiment, 8, 1)
 
         self.BtnDisable()
 
@@ -453,18 +461,27 @@ class MainWindow(QtWidgets.QMainWindow):
         with open(msg+'_data.txt','w+') as f:
             np.savetxt(f,ar,fmt=['%f','%f','%f','%f','%f'])
 
+        with open(msg+'_notes.txt','w+') as f:
+            for note in self.data['notes']:
+                f.write(str(note[0]) +' : '+ note[2]+'\n')
+
     def AddNote(self):
-        msg = self.txt_note.text()
-        time_true = time.time() - self.time_start_true
+        msg = self.path
+
         try:
+            time_true = time.time() - self.time_start_true
             time_sincestart = time.time() - self.time_start
         except:
+            time_true = 0
             time_sincestart = 0
 
         self.data['notes'].append([time_true, time_sincestart, msg])
 
-    def switch(self):
+    def switch_landing(self):
         self.switch_landingwindow.emit()
+
+    def switch_setup(self):
+        self.switch_setupwindow.emit()
 
     # -------------------------------------------------------------------------------------------------------------------
     # Arduino communication
@@ -568,11 +585,19 @@ class MainWindow(QtWidgets.QMainWindow):
         if returnValue == QMessageBox.Ok:
             self.Reset()
 
-    def PopUpReturn(self):
-        choice = QtWidgets.QMessageBox.question(self, 'Return', 'Are you sure you wish to return to Setup?',
+    def PopUpHome(self):
+        choice = QtWidgets.QMessageBox.question(self, 'Return', 'Are you sure you wish to return to Home?',
                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
-            self.switch()
+            self.switch_landing()
+        else:
+            pass
+
+    def PopUpSetup(self):
+        choice = QtWidgets.QMessageBox.question(self, 'Return', 'Are you sure you wish to return to Recipe Setup?',
+                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        if choice == QtWidgets.QMessageBox.Yes:
+            self.switch_setup()
         else:
             pass
 
@@ -598,4 +623,4 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(False)
         self.btn_reset.setEnabled(False)
-        self.btn_experiment.setEnabled(False)
+        # self.btn_experiment.setEnabled(False)
