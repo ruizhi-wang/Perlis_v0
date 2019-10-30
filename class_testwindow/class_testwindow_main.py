@@ -15,7 +15,7 @@ class TestWindow(QtWidgets.QMainWindow):
 
         self.setGeometry(50, 50, 800, 600)
 
-        self.setWindowTitle('HexagonFab Test Experiment')
+        self.setWindowTitle('HexagonFab Analysis App - Test Experiment')
         self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
 
         #--------------------------------------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ class TestWindow(QtWidgets.QMainWindow):
     def widgets(self):
 
         # Select the comport
-        self.com_label = QtGui.QLabel('Com Port : ')                # Create instance of QLabel
+        self.com_label = QtGui.QLabel('Com Port')                # Create instance of QLabel
         self.com_select = QtGui.QComboBox()                         # Create instance of QComboBox
         for port in ['COM' + str(x) for x in range(12)]:
             self.com_select.addItem(port)                           # Call Qt function addItem on self.com_select
@@ -84,20 +84,31 @@ class TestWindow(QtWidgets.QMainWindow):
         # XXXX
 
         # Start connection & showing the graph
-        self.btn_connect = QtGui.QPushButton('connect sensor')  # Create instance of QPushButton
+        self.btn_connect = QtGui.QPushButton('Connect \n sensor')  # Create instance of QPushButton
+        # self.btn_connect.setFixedWidth(70)
+        self.btn_connect.setFixedHeight(80)
+
+
         self.btn_connect.clicked.connect(self.ConnectSensor)  # Call StartShowing function when start button pressed
         self.btn_connect.clicked.connect(self.PopUpConnect)  # Call popup function when start button pressed
 
         # Operating the experiment
-        self.btn_start = QtGui.QPushButton('start')  # Create instance of QPushButton
+        self.btn_start = QtGui.QPushButton('>> start')  # Create instance of QPushButton
+        self.btn_start.setStyleSheet("background-color: #4933FF; color: white; height: 20;")
+        self.btn_start.setFixedWidth(150)
         self.btn_start.pressed.connect(self.PopUpStart)  # Activate warning about experiment erased
         self.btn_stop = QtGui.QPushButton('stop')
+        self.btn_stop.setStyleSheet("height: 20;")
+        self.btn_stop.setFixedWidth(70)
         self.btn_stop.clicked.connect(self.StopRecording)  # Call StopRecording function at button press
+
         self.btn_reset = QtGui.QPushButton('reset')
         self.btn_reset.clicked.connect(self.PopUpReset)  # Call Reset function at button press
+        self.btn_reset.setStyleSheet("height: 20;")
+        self.btn_reset.setFixedWidth(80)
 
         # Note text and connection
-        self.txt_note = QtGui.QLineEdit('note')  # Create instance of QLineEdit
+        self.txt_note = QtGui.QLineEdit('Type note here')  # Create instance of QLineEdit
         self.btn_note = QtGui.QPushButton('add note')  # Create instance of QPushButton
         self.btn_note.clicked.connect(self.AddNote)  # Call AddNote function at button press
 
@@ -105,7 +116,9 @@ class TestWindow(QtWidgets.QMainWindow):
         self.txt_file = QtGui.QLineEdit('file_name')  # Create instance of QLineEdit
         self.btn_save = QtGui.QPushButton('save')  # Create instance of QPushButton
         self.btn_save.clicked.connect(self.Save)  # Call Save function at button press
+        self.btn_save.setFixedWidth(70)
         self.btn_file = QtGui.QPushButton('file...')  # Create instance of QPushButton
+        self.btn_file.setFixedWidth(70)
         self.btn_file.clicked.connect(self.ChooseFile)  # Call ChooseFile function at button press
 
         # What - data widgets
@@ -114,8 +127,9 @@ class TestWindow(QtWidgets.QMainWindow):
         self.data_select3 = QtGui.QCheckBox('Averages')  # Create instance of QCheckBox
 
         # No-points box
-        self.points_label = QtGui.QLabel('No data points : ')  # Create instance of QLabel
+        self.points_label = QtGui.QLabel('No. data points')  # Create instance of QLabel
         self.txt_points = QtGui.QLineEdit('500')  # Create instance of QLineEdit
+        self.txt_points.setFixedWidth(70)
 
         # # Comport select
         # self.com_label = QtGui.QLabel('Com Port : ')  # Create instance of QLabel
@@ -124,42 +138,71 @@ class TestWindow(QtWidgets.QMainWindow):
         #     self.com_select.addItem(port)  # Call Qt function addItem on self.com_select
         # self.com_select.currentIndexChanged.connect(self.SetPort)  # Call SetPort function to select com port
 
+        # Labels & lines
+        self.control_label = QtGui.QLabel('Experiment Control')
+        self.control_label.setStyleSheet('font-weight: bold; padding-top:8;')
+
+        self.settings_label = QtGui.QLabel('Reader & sensor connection')
+        self.settings_label.setStyleSheet('font-weight: bold; padding-top:8;')
+
+        self.save_label = QtGui.QLabel('Save experiment results')
+        self.save_label.setStyleSheet('font-weight: bold; padding-top:8;')
+
+
         # Plot widgets and lines
         self.plot = pg.PlotWidget()
-        self.l1 = self.plot.plot(pen=pg.mkPen('r', width=3))
-        self.l2 = self.plot.plot(pen=pg.mkPen('b', width=3))
-        self.l3 = self.plot.plot(pen=pg.mkPen('w', width=3))
-        self.l4 = self.plot.plot(pen=pg.mkPen('r', width=3, style=QtCore.Qt.DashLine))
-        self.l5 = self.plot.plot(pen=pg.mkPen('b', width=3, style=QtCore.Qt.DashLine))
-        self.l6 = self.plot.plot(pen=pg.mkPen('w', width=3, style=QtCore.Qt.DashLine))
+        self.l1 = self.plot.plot(pen=pg.mkPen(color=(5,201,133), width=2))
+        self.l2 = self.plot.plot(pen=pg.mkPen(color=(253,203,98), width=2))
+        self.l3 = self.plot.plot(pen=pg.mkPen('w', width=2))
+        self.l4 = self.plot.plot(pen=pg.mkPen(color=(5,201,133), width=2, style=QtCore.Qt.DashLine))
+        self.l5 = self.plot.plot(pen=pg.mkPen(color=(253,203,98), width=2, style=QtCore.Qt.DashLine))
+        self.l6 = self.plot.plot(pen=pg.mkPen('w', width=2, style=QtCore.Qt.DashLine))
 
         # --------------------------------------------
 
     def display_widgets(self):
         # Code from Olli --------------------------------------------
         # Build all widgets and set locations
-        self.layout.addWidget(self.btn_connect, 0, 3)
-        self.layout.addWidget(self.btn_start, 1, 3)
-        self.layout.addWidget(self.btn_stop, 2, 3)
-        self.layout.addWidget(self.btn_reset, 4, 3)
-
-        self.layout.addWidget(self.points_label, 0, 0)
-        self.layout.addWidget(self.txt_points, 0, 1)
-
-        self.layout.addWidget(self.data_select1, 0, 2)
-        self.layout.addWidget(self.data_select2, 1, 2)
-        self.layout.addWidget(self.data_select3, 2, 2)
-
-        self.layout.addWidget(self.com_select, 1, 1)
-        self.layout.addWidget(self.com_label, 1, 0)
 
         self.layout.addWidget(self.plot, 3, 0, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
-        self.layout.addWidget(self.btn_note, 7, 2)
-        self.layout.addWidget(self.txt_note, 7, 0, 1, 2)
-        self.layout.addWidget(self.btn_file, 8, 2)
-        self.layout.addWidget(self.txt_file, 8, 0, 1, 2)
-        self.layout.addWidget(self.btn_save, 8, 3)
+        self.layout.addWidget(self.control_label, 4, 0)
+
+        self.layout.addWidget(self.btn_stop, 5, 0)
+        self.layout.addWidget(self.btn_start, 5, 1, 1,2)
+        self.layout.addWidget(self.btn_reset, 5, 3, QtCore.Qt.AlignRight)
+
+
+        self.layout.addWidget(self.txt_note, 6, 0, 1, 3)
+        self.layout.addWidget(self.btn_note, 6, 3, 1, 1)
+
+        self.layout.addWidget(self.settings_label, 7, 0)
+
+
+        self.layout.addWidget(self.data_select1, 8, 0)
+        self.layout.addWidget(self.data_select2, 9, 0)
+        self.layout.addWidget(self.data_select3, 10, 0)
+
+
+        self.layout.addWidget(self.txt_points, 8, 1)
+        self.layout.addWidget(self.points_label, 8, 2, QtCore.Qt.AlignLeft)
+
+
+
+        self.layout.addWidget(self.btn_connect, 8, 3, 3,1)
+
+        self.layout.addWidget(self.com_select, 9, 1)
+        self.layout.addWidget(self.com_label, 9, 2)
+
+
+
+        self.layout.addWidget(self.save_label, 13, 0)
+
+        self.layout.addWidget(self.btn_file, 14, 2)
+        self.layout.addWidget(self.txt_file, 14, 0, 1, 2)
+        self.layout.addWidget(self.btn_save, 14, 3)
+
+
 
         self.BtnDisable()
 
