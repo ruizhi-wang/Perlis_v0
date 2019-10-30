@@ -2,7 +2,7 @@ import os
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog
-
+from PyQt5.QtGui import QIcon, QPixmap
 
 class LandingWindow(QtWidgets.QMainWindow):
     """
@@ -16,8 +16,8 @@ class LandingWindow(QtWidgets.QMainWindow):
         super(LandingWindow, self).__init__()
 
         # Dimensions and style of the window
-        self.setGeometry(50, 50, 100, 100)
-        self.setWindowTitle('HexagonFab Landing')
+        self.setGeometry(50, 50, 600, 400)
+        self.setWindowTitle('HexagonFab Analysis App')
         self.setWindowIcon(QtGui.QIcon('HexagonFab_RGB.jpg'))
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Plastique'))
 
@@ -57,19 +57,39 @@ class LandingWindow(QtWidgets.QMainWindow):
 
     def widgets(self):
 
+        # Show HexagonFab logo
+        self.logo = QtWidgets.QLabel("HexagonFab")
+        pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        pixmap = pixmap.scaledToWidth(250, 1)
+        self.logo.setPixmap(pixmap)
+
+
+
         # Create new recipe file
         self.btn_create_project = QtWidgets.QPushButton('Create new experiment')
-        self.btn_create_project.setStyleSheet("background-color: blue")
+        self.btn_create_project.setStyleSheet("background-color: #4933FF; \
+                                              color: white; \
+                                              height: 25; \
+                                              ")
+        self.btn_create_project.setFixedWidth(170)
         self.btn_create_project.clicked.connect(self.SwitchSetup)
 
         # Freestyle experiment
         self.btn_test = QtWidgets.QPushButton('Test Experiment')
+        self.btn_test.setFlat(True)
+        self.btn_test.setStyleSheet("height: 10;")
         self.btn_test.clicked.connect(self.SwitchTest)
 
     def display_widgets(self):
+
+        # Logo
+        self.layout.addWidget(self.logo, 1,1,QtCore.Qt.AlignHCenter)
+
         # Buttons
-        self.layout.addWidget(self.btn_create_project, 1, 1)
-        self.layout.addWidget(self.btn_test, 2, 1)
+        self.layout.addWidget(self.btn_create_project, 2, 1, QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(self.btn_test, 3, 1, QtCore.Qt.AlignHCenter)
+
+
 
         self.show()
 
