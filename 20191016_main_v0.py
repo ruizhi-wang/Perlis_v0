@@ -6,6 +6,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 # Import Perlis modules
 from class_setup import class_setup_main
 from class_mainwindow import class_mainwindow_main
+from class_landing import class_landing_main
 
 import qtmodern.styles
 import qtmodern.windows
@@ -18,6 +19,28 @@ class Controller(QtWidgets.QMainWindow):
     def __init__(self):
         super(Controller, self).__init__()
         pass
+
+    def show_landing(self):
+        try:
+            self.main_window.close()
+        except:
+            pass
+
+        try:
+            self.test_window.close()
+        except:
+            pass
+
+        try:
+            self.setup.close()
+        except:
+            pass
+        # Call first landing window
+        self.landing = class_landing_main.LandingWindow()
+        # Code to call main window
+        self.landing.switch_setupwindow.connect(self.show_setup)
+        self.landing.switch_testwindow.connect(self.show_test)
+        self.landing.show()
 
     def show_setup(self):
         try:
@@ -42,7 +65,7 @@ class Controller(QtWidgets.QMainWindow):
         self.setup.show()
 
     def show_main(self, pass_value):
-        self.window = class_mainwindow_main.MainWindow(pass_value)
+        self.main_window = class_mainwindow_main.MainWindow(pass_value)
         self.setup.close()
         self.main_window.switch_landingwindow.connect(self.show_landing)
         self.main_window.switch_setupwindow.connect(self.show_setup)
