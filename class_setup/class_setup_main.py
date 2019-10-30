@@ -13,8 +13,13 @@ class Setup(QtWidgets.QMainWindow):
     switch_mainwindow = QtCore.pyqtSignal(list)
     switch_landingwindow = QtCore.pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, pass_val):
         super(Setup, self).__init__()
+
+        # Load the recipe passed on from landing page
+        self.recipe = pass_val[0]
+        # Load the path
+        self.path = pass_val[1]
 
         # Dimensions and style of the window
         self.setGeometry(50, 50, 600, 400)
@@ -40,14 +45,6 @@ class Setup(QtWidgets.QMainWindow):
         self.closeWindow.triggered.connect(self.close_app)
         self.toolBar.addAction(self.closeWindow)
 
-        # Setup data
-        # self.recipe = {'step_txt': ["base", "base"], 'step_time': ["100", "10"]}
-        self.recipe = {'step_txt': [], 'step_time': []}
-
-        # Create empty file path
-        # self.path = 'path_file'
-        self.path = ''
-
         # Execute main window
         self.main_window()
 
@@ -56,6 +53,8 @@ class Setup(QtWidgets.QMainWindow):
         self.layout = QtWidgets.QGridLayout()
         # self.layout.setRowStretch(6, 10)
         self.recipeTable = QTableWidget()
+        # Generate table with the recipe that has been passed in
+        self.generate_table()
 
         # Create layout
         self.setCentralWidget(QtWidgets.QWidget(self))
@@ -78,13 +77,13 @@ class Setup(QtWidgets.QMainWindow):
         self.txt_step_name = QtWidgets.QLineEdit('Add protein1')
         self.txt_step_time = QtWidgets.QLineEdit("100")
 
-        # Create new recipe file
-        self.btn_create_project = QtWidgets.QPushButton('New')
-        self.btn_create_project.clicked.connect(self.new)
-
-        # Load previous recipe
-        self.btn_load_project = QtWidgets.QPushButton('Load')
-        self.btn_load_project.clicked.connect(self.load)
+        # # Create new recipe file
+        # self.btn_create_project = QtWidgets.QPushButton(self.pass_val)
+        # self.btn_create_project.clicked.connect(self.new)
+        #
+        # # Load previous recipe
+        # self.btn_load_project = QtWidgets.QPushButton('Load')
+        # self.btn_load_project.clicked.connect(self.load)
 
         # Add step
         self.btn_step_add = QtWidgets.QPushButton('Add')
@@ -117,8 +116,8 @@ class Setup(QtWidgets.QMainWindow):
         self.layout.addWidget(self.txt_step_time, 5, 3)
 
         # Buttons
-        self.layout.addWidget(self.btn_create_project, 1, 2)
-        self.layout.addWidget(self.btn_load_project, 1, 3)
+        # self.layout.addWidget(self.btn_create_project, 1, 2)
+        # self.layout.addWidget(self.btn_load_project, 1, 3)
         self.layout.addWidget(self.btn_step_add, 5, 4)
         self.layout.addWidget(self.btn_reset_recipe, 6, 4)
         self.layout.addWidget(self.btn_save, 8, 2)
@@ -129,6 +128,7 @@ class Setup(QtWidgets.QMainWindow):
         self.show()
 
     def generate_table(self):
+        print(self.recipe)
         # Create table
         self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
         self.recipeTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
@@ -152,23 +152,6 @@ class Setup(QtWidgets.QMainWindow):
 
         # table selection change
         # self.tableWidget.doubleClicked.connect(self.on_click)
-
-    def new(self):
-        description = "Empty"
-
-        file_path = QFileDialog.getSaveFileName(self, 'Save File', os.getenv('HOME'))[0]
-
-        filename_recipe=file_path+"_recipe.txt"
-
-        with open(filename_recipe, "w") as file:
-            file.write(description + '\n')
-
-        if file_path == '':
-            return
-        else:
-            self.BtnEnable()
-
-        self.path = file_path
 
     def file_save(self):
         try:
@@ -242,10 +225,11 @@ class Setup(QtWidgets.QMainWindow):
         self.btn_start.setEnabled(True)
 
     def BtnDisable(self):
-        self.btn_step_add.setEnabled(False)
-        self.btn_reset_recipe.setEnabled(False)
-        self.btn_save.setEnabled(False)
-        self.btn_start.setEnabled(False)
+        print("nothing")
+        # self.btn_step_add.setEnabled(False)
+        # self.btn_reset_recipe.setEnabled(False)
+        # self.btn_save.setEnabled(False)
+        # self.btn_start.setEnabled(False)
 
     def PopUpReset(self):
         choice = QtWidgets.QMessageBox.question(self, 'Reset', 'Are you sure you wish to reset the recipe?',

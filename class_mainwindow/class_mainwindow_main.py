@@ -12,7 +12,7 @@ import time
 class MainWindow(QtWidgets.QMainWindow):
 
     switch_landingwindow = QtCore.pyqtSignal()
-    switch_setupwindow = QtCore.pyqtSignal()
+    switch_setupwindow = QtCore.pyqtSignal(list)
 
     def __init__(self, pass_value):
         super(MainWindow, self).__init__()
@@ -31,7 +31,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Initialize step counter
         self.step_tracker = 0
         # Load values in form arguments
-        self.experiment_steps = pass_value[0]
+        self.recipe = pass_value[0]
         self.path = pass_value[1]
         
         # Set go_state to False to prevent data being written
@@ -204,7 +204,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def timer_step_counter(self):
         self.timer_step = QtCore.QTimer()
-        step_time=int(self.experiment_steps["step_time"][self.step_tracker])*1000
+        step_time= int(self.recipe["step_time"][self.step_tracker]) * 1000
         self.timer_step.setInterval(step_time)
         self.timer_step.timeout.connect(self.PopUpStep)
         self.timer_step.start()
@@ -214,13 +214,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.current_time_counter.setText("Time remaining: %d" % self.counter)
 
     def StepExperiment(self):
-        num_steps = len(self.experiment_steps["step_time"])
+        num_steps = len(self.recipe["step_time"])
 
         # Timers stated here in case there are still experimental steps left
         if self.step_tracker < num_steps:
             self.timer_countdown_counter()
             # Get index of current step
-            self.counter = int(self.experiment_steps["step_time"][self.step_tracker])
+            self.counter = int(self.recipe["step_time"][self.step_tracker])
 
             self.timer_step_counter()
 
@@ -233,17 +233,17 @@ class MainWindow(QtWidgets.QMainWindow):
         # Display information about the correct step
         if self.step_tracker < num_steps:
             # Display information about current step
-            self.step_counter.setText("Name of current step: " + self.experiment_steps["step_txt"][self.step_tracker])
+            self.step_counter.setText("Name of current step: " + self.recipe["step_txt"][self.step_tracker])
             self.duration_counter.setText(
-                "Duration of current step: " + self.experiment_steps["step_time"][self.step_tracker])
+                "Duration of current step: " + self.recipe["step_time"][self.step_tracker])
         else:
             self.step_counter.setText("End of Experiment")
             self.duration_counter.setText("End of Experiment")
 
         if self.step_tracker + 1 < num_steps:
             # Display information about next step
-            self.step_next.setText("Name of next step: " + self.experiment_steps["step_txt"][self.step_tracker + 1])
-            self.duration_next.setText("Duration of next step: " + self.experiment_steps["step_time"][self.step_tracker + 1])
+            self.step_next.setText("Name of next step: " + self.recipe["step_txt"][self.step_tracker + 1])
+            self.duration_next.setText("Duration of next step: " + self.recipe["step_time"][self.step_tracker + 1])
         else:
             self.step_next.setText("End of Experiment")
             self.duration_next.setText("End of Experiment")
@@ -479,7 +479,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.switch_landingwindow.emit()
 
     def switch_setup(self):
-        self.switch_setupwindow.emit()
+        pass_val = [self.recipe, self.path]
+        self.switch_setupwindow.emit(pass_val)
 
     # -------------------------------------------------------------------------------------------------------------------
     # Arduino communication
@@ -527,10 +528,10 @@ class MainWindow(QtWidgets.QMainWindow):
             msgBox = QMessageBox()
             msgBox.setIcon(QMessageBox.Information)
             # For some weird reason, but the time self.step_tracker has been passed in, it has already increased by 1
-            if current_step < len(self.experiment_steps["step_time"]):
-                msgBox.setText(str(self.experiment_steps["step_txt"][current_step]))
+            if current_step < len(self.recipe["step_time"]):
+                msgBox.setText(str(self.recipe["step_txt"][current_step]))
 
-            if current_step == len(self.experiment_steps["step_time"]):
+            if current_step == len(self.recipe["step_time"]):
                 msgBox.setText("Done with the experiment!")
 
             msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
