@@ -517,7 +517,7 @@ class TestWindow(QtWidgets.QMainWindow):
         returnValue = msgBox.exec()
 
     def PopUpStart(self):
-        text_message = "Start Experiment - All previous data will be erased"
+        text_message = "Start Experiment - Data will be saved"
 
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
@@ -529,7 +529,6 @@ class TestWindow(QtWidgets.QMainWindow):
 
         if returnValue == QMessageBox.Ok:
             self.StartRecording() # Call StartRecording function when ok button pressed
-            self.StepExperiment() # Trigger first step in experiment
         
     def PopUpReset(self):
         text_message = "All data will be erased"

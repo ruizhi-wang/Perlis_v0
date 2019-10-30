@@ -17,7 +17,7 @@ class LandingWindow(QtWidgets.QMainWindow):
         super(LandingWindow, self).__init__()
 
         self.path = ''
-        self.recipe = [1,2,3]
+        self.recipe = {'step_txt': [], 'step_time': []}
 
         # Dimensions and style of the window
         self.setGeometry(50, 50, 600, 400)
@@ -103,6 +103,26 @@ class LandingWindow(QtWidgets.QMainWindow):
 
         self.path = file_path
 
+    def LoadRecipe(self):
+        try:
+            file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getenv('HOME'))[0]
+            file = open(file_path, 'r+')  # Open with the intention to read
+
+            if file.mode == 'r+':  # Check if file is in 'read mode'
+                self.recipe = {'step_txt': [], 'step_time': []}
+
+                for x in range(2):
+                    next(file)
+
+                for line in file:
+                    content = line.split(' : ')
+                    self.recipe['step_txt'].append(content[0])
+                    self.recipe['step_time'].append(content[1].rstrip())
+
+            self.path = file_path
+        except:
+            print('Load file error')
+
     def close_app(self):
         choice = QtWidgets.QMessageBox.question(self, 'Close', 'Are you sure you wish to exit?',
                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
@@ -124,13 +144,23 @@ class LandingWindow(QtWidgets.QMainWindow):
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
         msgBox.setText(text_message)
-        msgBox.addButton("Create Recipe", QMessageBox.NoRole)
-        msgBox.addButton("Load Recipe", QMessageBox.YesRole)
+        msgBox.addButton("Create Recipe", QMessageBox.ActionRole)
+        msgBox.addButton("Load Recipe", QMessageBox.AcceptRole)
         returnValue = msgBox.exec()
 
+
         if returnValue == 1:
-            print("Load")
+            print("1")
+            self.LoadRecipe()
+            if self.path != '':
+                self.SwitchSetup()
+            else:
+                pass
 
         if returnValue == 0:
+            print("0")
             self.PathCreate()
-            self.SwitchSetup()
+            if self.path != '':
+                self.SwitchSetup()
+            else:
+                pass

@@ -12,7 +12,7 @@ from class_testwindow import class_testwindow_main
 import qtmodern.styles
 import qtmodern.windows
 
-
+# Passvalue is a list: [0] is a dict with the recipe; [1] is a str with the path
 
 # Define controller to act
 class Controller(QtWidgets.QMainWindow):
@@ -43,7 +43,7 @@ class Controller(QtWidgets.QMainWindow):
         self.landing.switch_testwindow.connect(self.show_test)
         self.landing.show()
 
-    def show_setup(self, path_value):
+    def show_setup(self, pass_value):
         try:
             self.main_window.close()
         except:
@@ -59,7 +59,7 @@ class Controller(QtWidgets.QMainWindow):
         except:
             pass
         # Call first setup window
-        self.setup = class_setup_main.Setup(path_value)
+        self.setup = class_setup_main.Setup(pass_value)
         # Code to call main window
         self.setup.switch_landingwindow.connect(self.show_landing)
         self.setup.switch_mainwindow.connect(self.show_main)

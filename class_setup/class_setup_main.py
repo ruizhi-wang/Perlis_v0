@@ -16,9 +16,9 @@ class Setup(QtWidgets.QMainWindow):
     def __init__(self, pass_val):
         super(Setup, self).__init__()
 
-        # Create empty file path
-        self.experiment_steps = pass_val[0]
-        print(self.experiment_steps)
+        # Load the recipe passed on from landing page
+        self.recipe = pass_val[0]
+        # Load the path
         self.path = pass_val[1]
 
         # Dimensions and style of the window
@@ -45,10 +45,6 @@ class Setup(QtWidgets.QMainWindow):
         self.closeWindow.triggered.connect(self.close_app)
         self.toolBar.addAction(self.closeWindow)
 
-        # Setup data
-        # self.recipe = {'step_txt': ["base", "base"], 'step_time': ["100", "10"]}
-        self.recipe = {'step_txt': [], 'step_time': []}
-
         # Execute main window
         self.main_window()
 
@@ -57,6 +53,8 @@ class Setup(QtWidgets.QMainWindow):
         self.layout = QtWidgets.QGridLayout()
         # self.layout.setRowStretch(6, 10)
         self.recipeTable = QTableWidget()
+        # Generate table with the recipe that has been passed in
+        self.generate_table()
 
         # Create layout
         self.setCentralWidget(QtWidgets.QWidget(self))
@@ -130,6 +128,7 @@ class Setup(QtWidgets.QMainWindow):
         self.show()
 
     def generate_table(self):
+        print(self.recipe)
         # Create table
         self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
         self.recipeTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
@@ -153,23 +152,6 @@ class Setup(QtWidgets.QMainWindow):
 
         # table selection change
         # self.tableWidget.doubleClicked.connect(self.on_click)
-
-    def new(self):
-        description = "Empty"
-
-        file_path = QFileDialog.getSaveFileName(self, 'Save File', os.getenv('HOME'))[0]
-
-        filename_recipe=file_path+"_recipe.txt"
-
-        with open(filename_recipe, "w") as file:
-            file.write(description + '\n')
-
-        if file_path == '':
-            return
-        else:
-            self.BtnEnable()
-
-        self.path = file_path
 
     def file_save(self):
         try:
