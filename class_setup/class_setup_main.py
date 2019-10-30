@@ -77,6 +77,7 @@ class Setup(QtWidgets.QMainWindow):
         self.txt_step_name = QtWidgets.QLineEdit('Add protein1')
         self.txt_step_time = QtWidgets.QLineEdit("100")
 
+        # #Heritage code - DO NOT DELETE - In case want to go back to create/load in this window
         # # Create new recipe file
         # self.btn_create_project = QtWidgets.QPushButton(self.pass_val)
         # self.btn_create_project.clicked.connect(self.new)
@@ -123,8 +124,6 @@ class Setup(QtWidgets.QMainWindow):
         self.layout.addWidget(self.btn_save, 8, 2)
         self.layout.addWidget(self.btn_start, 8, 3)
 
-        self.BtnDisable()
-
         self.show()
 
     def generate_table(self):
@@ -166,28 +165,28 @@ class Setup(QtWidgets.QMainWindow):
         except:
             print('File save error')
 
-
-    def load(self):
-        try:
-            file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getenv('HOME'))[0]
-            file = open(file_path, 'r+')  # Open with the intention to read
-
-            if file.mode == 'r+':  # Check if file is in 'read mode'
-                self.recipe = {'step_txt': [], 'step_time': []}
-
-                for x in range(2):
-                    next(file)
-
-                for line in file:
-                    content = line.split(' : ')
-                    self.recipe['step_txt'].append(content[0])
-                    self.recipe['step_time'].append(content[1].rstrip())
-
-            self.generate_table()
-            self.path = file_path
-            self.BtnEnable()
-        except:
-            print('Load file error')
+    # # Heritage code - DO NOT DELETE - In case want to go back to create/load in this window
+    # def load(self):
+    #     try:
+    #         file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getenv('HOME'))[0]
+    #         file = open(file_path, 'r+')  # Open with the intention to read
+    #
+    #         if file.mode == 'r+':  # Check if file is in 'read mode'
+    #             self.recipe = {'step_txt': [], 'step_time': []}
+    #
+    #             for x in range(2):
+    #                 next(file)
+    #
+    #             for line in file:
+    #                 content = line.split(' : ')
+    #                 self.recipe['step_txt'].append(content[0])
+    #                 self.recipe['step_time'].append(content[1].rstrip())
+    #
+    #         self.generate_table()
+    #         self.path = file_path
+    #         self.BtnEnable()
+    #     except:
+    #         print('Load file error')
 
     def add(self):
         update_name = self.txt_step_name.text()
@@ -218,18 +217,20 @@ class Setup(QtWidgets.QMainWindow):
     def SwitchLanding(self):
         self.switch_landingwindow.emit()
 
-    def BtnEnable(self):
-        self.btn_step_add.setEnabled(True)
-        self.btn_reset_recipe.setEnabled(True)
-        self.btn_save.setEnabled(True)
-        self.btn_start.setEnabled(True)
+    # # Heritage code - DO NOT DELETE - In case want to go back to create/load in this window
+    # def BtnEnable(self):
+    #     self.btn_step_add.setEnabled(True)
+    #     self.btn_reset_recipe.setEnabled(True)
+    #     self.btn_save.setEnabled(True)
+    #     self.btn_start.setEnabled(True)
 
-    def BtnDisable(self):
-        print("nothing")
-        # self.btn_step_add.setEnabled(False)
-        # self.btn_reset_recipe.setEnabled(False)
-        # self.btn_save.setEnabled(False)
-        # self.btn_start.setEnabled(False)
+    # # Heritage code - DO NOT DELETE - In case want to go back to create/load in this window
+    # def BtnDisable(self):
+    #     pass
+    #     # self.btn_step_add.setEnabled(False)
+    #     # self.btn_reset_recipe.setEnabled(False)
+    #     # self.btn_save.setEnabled(False)
+    #     # self.btn_start.setEnabled(False)
 
     def PopUpReset(self):
         choice = QtWidgets.QMessageBox.question(self, 'Reset', 'Are you sure you wish to reset the recipe?',

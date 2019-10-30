@@ -137,6 +137,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.points_label = QtGui.QLabel('No data points : ')  # Create instance of QLabel
         self.txt_points = QtGui.QLineEdit('500')  # Create instance of QLineEdit
 
+        # Define table
+        self.recipeTable = QTableWidget()
+
         # # Comport select
         # self.com_label = QtGui.QLabel('Com Port : ')  # Create instance of QLabel
         # self.com_select = QtGui.QComboBox()  # Create instance of QComboBox
@@ -155,28 +158,49 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --------------------------------------------
 
+    def generate_table(self):
+        # Create table
+        self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        self.recipeTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.recipeTable.setRowCount(len(self.recipe['step_txt']))
+        self.recipeTable.setColumnCount(2)
+        self.recipeTable.setRowCount(5)
+
+        self.recipeTable.setHorizontalHeaderLabels(['Step Name', 'Time'])
+        # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
+        header = self.recipeTable.horizontalHeader()
+        header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
+
+        for row in range(len(self.recipe['step_txt'])):
+            self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
+            self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
+            row += 1
+
+        self.layout.addWidget(self.recipeTable, 3, 0, 2, 2)
+        self.show()
+
     def display_widgets(self):
-        # Code from Olli --------------------------------------------
         # Build all widgets and set locations
-        self.layout.addWidget(self.btn_connect, 0, 3)
-        self.layout.addWidget(self.btn_start, 1, 3)
-        self.layout.addWidget(self.btn_stop, 2, 3)
-        self.layout.addWidget(self.btn_reset, 4, 3)
+        self.layout.addWidget(self.btn_connect, 0, 4)
+        self.layout.addWidget(self.btn_start, 1, 4)
+        self.layout.addWidget(self.btn_stop, 2, 4)
+        self.layout.addWidget(self.btn_reset, 4, 4)
 
-        self.layout.addWidget(self.points_label, 0, 0)
-        self.layout.addWidget(self.txt_points, 0, 1)
+        self.layout.addWidget(self.points_label, 0, 1)
+        self.layout.addWidget(self.txt_points, 0, 2)
 
-        self.layout.addWidget(self.data_select1, 0, 2)
-        self.layout.addWidget(self.data_select2, 1, 2)
-        self.layout.addWidget(self.data_select3, 2, 2)
+        self.layout.addWidget(self.data_select1, 0, 3)
+        self.layout.addWidget(self.data_select2, 1, 3)
+        self.layout.addWidget(self.data_select3, 2, 3)
 
-        self.layout.addWidget(self.com_select, 1, 1)
-        self.layout.addWidget(self.com_label, 1, 0)
+        self.layout.addWidget(self.com_select, 1, 2)
+        self.layout.addWidget(self.com_label, 1, 1)
 
-        self.layout.addWidget(self.txt_note, 8, 1)
-        self.layout.addWidget(self.btn_note, 8, 2)
+        self.layout.addWidget(self.txt_note, 8, 2)
+        self.layout.addWidget(self.btn_note, 8, 3)
 
-        self.layout.addWidget(self.plot, 3, 0, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
+        self.layout.addWidget(self.plot, 3, 1, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
         # self.layout.addWidget(self.btn_file, 4, 2)
         # self.layout.addWidget(self.txt_file, 4, 0, 1, 2)
@@ -184,13 +208,14 @@ class MainWindow(QtWidgets.QMainWindow):
         # --------------------------------------------
 
         # Assign widget locations based on grid layout
-        self.layout.addWidget(self.current_time_counter, 6, 1)
-        self.layout.addWidget(self.duration_counter, 5, 1)
-        self.layout.addWidget(self.step_counter, 5, 2)
-        self.layout.addWidget(self.btn_experiment, 5, 3)
-        self.layout.addWidget(self.duration_next, 7, 1)
-        self.layout.addWidget(self.step_next, 7, 2)
+        self.layout.addWidget(self.current_time_counter, 6, 2)
+        self.layout.addWidget(self.duration_counter, 5, 2)
+        self.layout.addWidget(self.step_counter, 5, 3)
+        self.layout.addWidget(self.btn_experiment, 5, 4)
+        self.layout.addWidget(self.duration_next, 7, 5)
+        self.layout.addWidget(self.step_next, 7, 3)
 
+        self.generate_table()
         self.BtnDisable()
 
         self.show()
@@ -490,7 +515,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print(self.port)
 
 
-    #-------------------------------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------------------------------------------------
     # Definition of PopUps
     def PopUpConnect(self):
 #        resistance_list=self.resistance_val.split(',')
@@ -622,4 +647,4 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(False)
         self.btn_reset.setEnabled(False)
-        # self.btn_experiment.setEnabled(False)
+        self.btn_experiment.setEnabled(False)

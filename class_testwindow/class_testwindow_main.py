@@ -115,9 +115,6 @@ class TestWindow(QtWidgets.QMainWindow):
 
         # Save, file and text widgets and connections
         self.txt_file = QtGui.QLineEdit('file_name')  # Create instance of QLineEdit
-        self.btn_save = QtGui.QPushButton('save')  # Create instance of QPushButton
-        self.btn_save.clicked.connect(self.Save)  # Call Save function at button press
-        self.btn_save.setFixedWidth(70)
         self.btn_file = QtGui.QPushButton('file...')  # Create instance of QPushButton
         self.btn_file.setFixedWidth(70)
         self.btn_file.clicked.connect(self.ChooseFile)  # Call ChooseFile function at button press
@@ -210,7 +207,6 @@ class TestWindow(QtWidgets.QMainWindow):
 
         self.layout.addWidget(self.btn_file, 14, 2)
         self.layout.addWidget(self.txt_file, 14, 0, 1, 2)
-        self.layout.addWidget(self.btn_save, 14, 3)
 
 
 
@@ -622,11 +618,9 @@ class TestWindow(QtWidgets.QMainWindow):
         self.btn_stop.setEnabled(True)
         self.btn_reset.setEnabled(True)
         self.btn_note.setEnabled(True)
-        self.btn_save.setEnabled(True)
 
     def BtnDisable(self):
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(False)
         self.btn_reset.setEnabled(False)
         self.btn_note.setEnabled(False)
-        self.btn_save.setEnabled(False)
