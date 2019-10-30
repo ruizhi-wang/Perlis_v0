@@ -43,7 +43,7 @@ class Controller(QtWidgets.QMainWindow):
         self.landing.switch_testwindow.connect(self.show_test)
         self.landing.show()
 
-    def show_setup(self):
+    def show_setup(self, path_value):
         try:
             self.main_window.close()
         except:
@@ -59,7 +59,7 @@ class Controller(QtWidgets.QMainWindow):
         except:
             pass
         # Call first setup window
-        self.setup = class_setup_main.Setup()
+        self.setup = class_setup_main.Setup(path_value)
         # Code to call main window
         self.setup.switch_landingwindow.connect(self.show_landing)
         self.setup.switch_mainwindow.connect(self.show_main)

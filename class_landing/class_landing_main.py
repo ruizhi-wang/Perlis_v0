@@ -1,7 +1,7 @@
 import os
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog, QMessageBox
 from PyQt5.QtGui import QIcon, QPixmap
 
 class LandingWindow(QtWidgets.QMainWindow):
@@ -9,11 +9,15 @@ class LandingWindow(QtWidgets.QMainWindow):
     Class that defines setup window in reader UI.
     """
     # Define switch window as a type of pyqtSignal, i.e., once activated the window will be switched
-    switch_setupwindow = QtCore.pyqtSignal()
+    switch_setupwindow = QtCore.pyqtSignal(list)
     switch_testwindow = QtCore.pyqtSignal()
+
 
     def __init__(self):
         super(LandingWindow, self).__init__()
+
+        self.path = ''
+        self.recipe = [1,2,3]
 
         # Dimensions and style of the window
         self.setGeometry(50, 50, 600, 400)
@@ -63,8 +67,6 @@ class LandingWindow(QtWidgets.QMainWindow):
         pixmap = pixmap.scaledToWidth(250, 1)
         self.logo.setPixmap(pixmap)
 
-
-
         # Create new recipe file
         self.btn_create_project = QtWidgets.QPushButton('Create new experiment')
         self.btn_create_project.setStyleSheet("background-color: #4933FF; \
@@ -72,7 +74,7 @@ class LandingWindow(QtWidgets.QMainWindow):
                                               height: 25; \
                                               ")
         self.btn_create_project.setFixedWidth(170)
-        self.btn_create_project.clicked.connect(self.SwitchSetup)
+        self.btn_create_project.clicked.connect(self.PopUpNew)
 
         # Freestyle experiment
         self.btn_test = QtWidgets.QPushButton('Test Experiment')
@@ -89,24 +91,15 @@ class LandingWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.btn_create_project, 2, 1, QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.btn_test, 3, 1, QtCore.Qt.AlignHCenter)
 
-
-
         self.show()
 
-    def new(self):
+    def PathCreate(self):
         description = "Empty"
 
-        file_path = QFileDialog.getSaveFileName(self, 'Save File', os.getenv('HOME'))[0]
-
-        filename_recipe=file_path+"_recipe.txt"
-
-        with open(filename_recipe, "w") as file:
-            file.write(description + '\n')
+        file_path = QFileDialog.getSaveFileName(self, 'Please provide path for experiment', os.getenv('HOME'))[0]
 
         if file_path == '':
             return
-        else:
-            self.BtnEnable()
 
         self.path = file_path
 
@@ -119,7 +112,25 @@ class LandingWindow(QtWidgets.QMainWindow):
             pass
 
     def SwitchSetup(self):
-        self.switch_setupwindow.emit()
+        pass_val=[self.recipe, self.path]
+        self.switch_setupwindow.emit(pass_val)
 
     def SwitchTest(self):
         self.switch_testwindow.emit()
+
+    #-------------------------------------------------------------------------------------------------------------------
+    def PopUpNew(self):
+        text_message = "Would you like to create a new recipe or load an existing one?"
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText(text_message)
+        msgBox.addButton("Create Recipe", QMessageBox.NoRole)
+        msgBox.addButton("Load Recipe", QMessageBox.YesRole)
+        returnValue = msgBox.exec()
+
+        if returnValue == 1:
+            print("Load")
+
+        if returnValue == 0:
+            self.PathCreate()
+            self.SwitchSetup()
