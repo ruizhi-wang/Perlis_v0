@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout, QMessageBox
+from PyQt5.QtGui import QPixmap
 import pyqtgraph as pg
 import numpy as np
 import serial
@@ -139,6 +140,12 @@ class TestWindow(QtWidgets.QMainWindow):
         # self.com_select.currentIndexChanged.connect(self.SetPort)  # Call SetPort function to select com port
 
         # Labels & lines
+        self.header_label = QtGui.QLabel('HexagonFab')
+        # self.header_label.setStyleSheet('background-color: #121212; font-weight: bold; padding-top:8;height:30')
+        pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        pixmap = pixmap.scaledToWidth(100, 1)
+        self.header_label.setPixmap(pixmap)
+
         self.control_label = QtGui.QLabel('Experiment Control')
         self.control_label.setStyleSheet('font-weight: bold; padding-top:8;')
 
@@ -151,6 +158,7 @@ class TestWindow(QtWidgets.QMainWindow):
 
         # Plot widgets and lines
         self.plot = pg.PlotWidget()
+        self.plot.setBackground('#121212')
         self.l1 = self.plot.plot(pen=pg.mkPen(color=(5,201,133), width=2))
         self.l2 = self.plot.plot(pen=pg.mkPen(color=(253,203,98), width=2))
         self.l3 = self.plot.plot(pen=pg.mkPen('w', width=2))
@@ -163,6 +171,8 @@ class TestWindow(QtWidgets.QMainWindow):
     def display_widgets(self):
         # Code from Olli --------------------------------------------
         # Build all widgets and set locations
+
+        self.layout.addWidget(self.header_label,1,0,2,0)
 
         self.layout.addWidget(self.plot, 3, 0, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
