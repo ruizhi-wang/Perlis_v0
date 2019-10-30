@@ -45,9 +45,22 @@ class Controller(QtWidgets.QMainWindow):
         self.landing.show()
 
     def show_setup(self):
+        try:
+            self.main_window.close()
+        except:
+            pass
+
+        try:
+            self.test_window.close()
+        except:
+            pass
+
+        try:
+            self.landing.close()
+        except:
+            pass
         # Call first setup window
         self.setup = class_setup_main.Setup()
-        self.landing.close()
         # Code to call main window
         self.setup.switch_landingwindow.connect(self.show_landing)
         self.setup.switch_mainwindow.connect(self.show_main)

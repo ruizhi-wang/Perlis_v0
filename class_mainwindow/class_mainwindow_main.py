@@ -24,8 +24,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         #--------------------------------------------------------------------------------------------------------------
         # Helper variables
-        # Initialize the time counter
+        # Initialize the time counter for displaying the remaining time of the step
         self.counter = 0
+        # Initialize the time counter for displaying the remaining time of the step
+        self.save_counter = 0
         # Initialize step counter
         self.step_tracker = 0
         # Load values in form arguments
@@ -255,18 +257,11 @@ class MainWindow(QtWidgets.QMainWindow):
         time_sincestart = time.time() - self.time_start_true
 
         try:
-            # XXXX
             self.ard.write(b'1')
-            # Commented out communication part with Arduino for testing with dummy data
             msg = self.ard.readline()[0:-2].decode("utf-8")
             print(msg)
             msg = msg.split(',')
-            # XXXX
-
-            # YYYYY
-            # Def dummy reistance values for testing
-            # msg=self.resistance_val.split(',')
-            # XXXXX
+            self.save_counter +=1
 
             if float(msg[0]) > 0 and float(msg[0]) < 20000:
                 self.data['data1'].append([time_true, time_sincestart, float(msg[0])])
@@ -296,7 +291,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if self.save_state:
             if time_true - self.save_timer > 1:
-                self.Save()
+                if self.save_counter > 20:
+                    self.Save()
+                    print('saved')
+                    self.save_counter=0
 
     # Communicate with Arduino to receive data
     def UpdateGraph(self):
@@ -466,7 +464,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 f.write(str(note[0]) +' : '+ note[2]+'\n')
 
     def AddNote(self):
-        msg = self.path
+        msg = self.txt_note.text()
 
         try:
             time_true = time.time() - self.time_start_true

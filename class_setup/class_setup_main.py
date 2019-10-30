@@ -186,10 +186,10 @@ class Setup(QtWidgets.QMainWindow):
 
     def load(self):
         try:
-            file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', 'TXT (*.txt)')[0]
-            file = open(file_path, 'r')  # Open with the intention to read
+            file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getenv('HOME'))[0]
+            file = open(file_path, 'r+')  # Open with the intention to read
 
-            if file.mode == 'r':  # Check if file is in 'read mode'
+            if file.mode == 'r+':  # Check if file is in 'read mode'
                 self.recipe = {'step_txt': [], 'step_time': []}
 
                 for x in range(2):

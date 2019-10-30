@@ -429,7 +429,7 @@ class TestWindow(QtWidgets.QMainWindow):
                 f.write(str(note[0]) +' : '+ note[2]+'\n')
 
     def AddNote(self):
-        msg = self.path
+        msg = self.txt_note.text()
 
         try:
             time_true = time.time() - self.time_start_true
