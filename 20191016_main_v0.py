@@ -7,6 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from class_setup import class_setup_main
 from class_mainwindow import class_mainwindow_main
 from class_landing import class_landing_main
+from class_testwindow import class_testwindow_main
 
 import qtmodern.styles
 import qtmodern.windows
