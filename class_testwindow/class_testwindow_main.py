@@ -546,7 +546,7 @@ class TestWindow(QtWidgets.QMainWindow):
             self.Reset()
 
     def PopUpReturn(self):
-        choice = QtWidgets.QMessageBox.question(self, 'Return', 'Are you sure you wish to return to Setup?',
+        choice = QtWidgets.QMessageBox.question(self, 'Return', 'Are you sure you wish to return to Home?',
                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
             self.switch()
