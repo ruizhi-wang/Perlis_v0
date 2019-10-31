@@ -35,11 +35,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.path = pass_value[1]
         
         # Set go_state to False to prevent data being written
-        self.go_state = False  # Create class variables (i.e. go_state) and set it to           
-            
+        self.go_state = False  # Create class variables (i.e. go_state) and set it to
 
         # Set timer for saving to 0
         self.save_timer = 0
+
+        # Set initial baseline value
+        self.baseline = [1, 1, 1, 1]
         
         # Setting up the data sets for saving and displaying
         self.data = {
@@ -107,9 +109,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_reset.clicked.connect(self.PopUpReset)  # Call Reset function at button press
 
         # Label showing the experimental steps
-        self.current_time_counter = QtWidgets.QLabel("Waiting to start experiment")
-        self.duration_counter = QtWidgets.QLabel()
-        self.step_counter = QtWidgets.QLabel()
+        self.current_time_counter = QtWidgets.QLabel("Time remaining \n -")
+        self.duration_counter = QtWidgets.QLabel("Time \n -")
+        self.step_counter = QtWidgets.QLabel("Current step \n -")
         self.duration_next = QtWidgets.QLabel()
         self.step_next = QtWidgets.QLabel()
 
@@ -139,6 +141,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Define table
         self.recipeTable = QTableWidget()
+        # self.currentTable = QTableWidget()
 
         # # Comport select
         # self.com_label = QtGui.QLabel('Com Port : ')  # Create instance of QLabel
@@ -158,13 +161,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --------------------------------------------
 
-    def generate_table(self):
+    def generate_recipe_table(self):
         # Create table
         self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-        self.recipeTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.recipeTable.setRowCount(len(self.recipe['step_txt']))
         self.recipeTable.setColumnCount(2)
-        self.recipeTable.setRowCount(5)
 
         self.recipeTable.setHorizontalHeaderLabels(['Step Name', 'Time'])
         # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
@@ -176,46 +178,75 @@ class MainWindow(QtWidgets.QMainWindow):
             self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
             self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
             row += 1
-
-        self.layout.addWidget(self.recipeTable, 3, 0, 2, 2)
         self.show()
 
+    # def generate_current_table(self):
+    #     # Create table
+    #     # self.currentTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+    #     # self.currentTable.verticalHeader().hide() # hide vertical/row headers
+    #     self.currentTable.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+    #     self.currentTable.setColumnCount(2)
+    #     self.currentTable.setRowCount(1)
+    #
+    #     self.currentTable.setHorizontalHeaderLabels(['Current Step', 'Time'])
+    #     number = self.currentTable.verticalHeader()
+    #     number.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
+    #     # self.currentTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
+    #     header = self.currentTable.horizontalHeader()
+    #     header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
+    #     header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
+    #
+    #     self.currentTable.setItem(0, 0, QTableWidgetItem(self.recipe['step_txt'][self.step_tracker]))
+    #     self.currentTable.setItem(0, 1, QTableWidgetItem(self.recipe['step_time'][self.step_tracker]))
+    #
+    #     self.show()
+
     def display_widgets(self):
+        # Style
+        self.points_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.com_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+        self.step_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.duration_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.current_time_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         # Build all widgets and set locations
-        self.layout.addWidget(self.btn_connect, 0, 4)
-        self.layout.addWidget(self.btn_start, 1, 4)
-        self.layout.addWidget(self.btn_stop, 2, 4)
-        self.layout.addWidget(self.btn_reset, 4, 4)
 
-        self.layout.addWidget(self.points_label, 0, 1)
-        self.layout.addWidget(self.txt_points, 0, 2)
+        self.layout.addWidget(self.data_select1, 0, 6)
+        self.layout.addWidget(self.data_select2, 1, 6)
+        self.layout.addWidget(self.data_select3, 2, 6)
 
-        self.layout.addWidget(self.data_select1, 0, 3)
-        self.layout.addWidget(self.data_select2, 1, 3)
-        self.layout.addWidget(self.data_select3, 2, 3)
+        self.layout.addWidget(self.btn_connect, 0, 7)
+        self.layout.addWidget(self.btn_start, 1, 7)
+        self.layout.addWidget(self.btn_stop, 2, 7)
+        self.layout.addWidget(self.btn_reset, 6, 7)
 
-        self.layout.addWidget(self.com_select, 1, 2)
-        self.layout.addWidget(self.com_label, 1, 1)
+        self.layout.addWidget(self.points_label, 0, 4)
+        self.layout.addWidget(self.txt_points, 0, 5)
 
-        self.layout.addWidget(self.txt_note, 8, 2)
-        self.layout.addWidget(self.btn_note, 8, 3)
+        self.layout.addWidget(self.com_label, 1, 4)
+        self.layout.addWidget(self.com_select, 1, 5)
 
-        self.layout.addWidget(self.plot, 3, 1, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
+        self.layout.addWidget(self.txt_note, 8, 5, 1, 2)
+        self.layout.addWidget(self.btn_note, 8, 7)
 
+        self.layout.addWidget(self.plot, 3, 4, 3, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
         # self.layout.addWidget(self.btn_file, 4, 2)
         # self.layout.addWidget(self.txt_file, 4, 0, 1, 2)
         # self.layout.addWidget(self.btn_save, 4, 3)
         # --------------------------------------------
 
         # Assign widget locations based on grid layout
-        self.layout.addWidget(self.current_time_counter, 6, 2)
-        self.layout.addWidget(self.duration_counter, 5, 2)
-        self.layout.addWidget(self.step_counter, 5, 3)
-        self.layout.addWidget(self.btn_experiment, 5, 4)
-        self.layout.addWidget(self.duration_next, 7, 5)
-        self.layout.addWidget(self.step_next, 7, 3)
+        self.layout.addWidget(self.step_counter, 1, 1)
+        self.layout.addWidget(self.duration_counter, 1, 2)
+        self.layout.addWidget(self.current_time_counter, 2, 2)
+        self.layout.addWidget(self.btn_experiment, 5, 2)
+        # self.layout.addWidget(self.duration_next, 7, 5)
+        # self.layout.addWidget(self.step_next, 7, 3)
+        # self.layout.addWidget(self.currentTable, 3, 0, 1, 3)
+        self.layout.addWidget(self.recipeTable, 3, 0, 2, 3)
 
-        self.generate_table()
+        # self.generate_current_table()
+        self.generate_recipe_table()
         self.BtnDisable()
 
         self.show()
@@ -236,7 +267,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def recurring_timer(self):
         self.counter -= 1
-        self.current_time_counter.setText("Time remaining: %d" % self.counter)
+        self.current_time_counter.setText("Time remaining \n" + str(self.counter))
 
     def StepExperiment(self):
         num_steps = len(self.recipe["step_time"])
@@ -246,32 +277,29 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer_countdown_counter()
             # Get index of current step
             self.counter = int(self.recipe["step_time"][self.step_tracker])
-
             self.timer_step_counter()
-
-
         else:
             self.timer_countdown_counter()
             self.timer_countdown.stop()
-            self.current_time_counter.setText("Time remaining: Experiment over")
+            self.current_time_counter.setText("Time remaining \n End")
 
         # Display information about the correct step
         if self.step_tracker < num_steps:
             # Display information about current step
-            self.step_counter.setText("Name of current step: " + self.recipe["step_txt"][self.step_tracker])
+            self.step_counter.setText("Current step: \n" + self.recipe["step_txt"][self.step_tracker])
             self.duration_counter.setText(
-                "Duration of current step: " + self.recipe["step_time"][self.step_tracker])
+                "Time: \n" + self.recipe["step_time"][self.step_tracker])
         else:
-            self.step_counter.setText("End of Experiment")
-            self.duration_counter.setText("End of Experiment")
+            self.step_counter.setText("Current step \n End")
+            self.duration_counter.setText("Time \n End")
 
         if self.step_tracker + 1 < num_steps:
             # Display information about next step
             self.step_next.setText("Name of next step: " + self.recipe["step_txt"][self.step_tracker + 1])
             self.duration_next.setText("Duration of next step: " + self.recipe["step_time"][self.step_tracker + 1])
         else:
-            self.step_next.setText("End of Experiment")
-            self.duration_next.setText("End of Experiment")
+            self.step_next.setText("Current step \n End of Experiment")
+            self.duration_next.setText("Time \n End of Experiment")
 
         self.step_tracker += 1
 
@@ -289,7 +317,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.save_counter +=1
 
             if float(msg[0]) > 0 and float(msg[0]) < 20000:
-                self.data['data1'].append([time_true, time_sincestart, float(msg[0])])
+                self.data['data1'].append([time_true, time_sincestart, float(msg[0])]) # Definition of self.data
             else:
                 self.data['data1'].append([time_true, time_sincestart, -1])
 
@@ -323,7 +351,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Communicate with Arduino to receive data
     def UpdateGraph(self):
-        d1 = [x[2] for x in self.data['data1']]
+        d1 = [x[2] for x in self.data['data1']] # x[2] is an array with all the values recorded for channel 1
         d2 = [x[2] for x in self.data['data2']]
         d3 = [x[2] for x in self.data['data3']]
         d4 = [x[2] for x in self.data['data4']]
@@ -369,6 +397,9 @@ class MainWindow(QtWidgets.QMainWindow):
                            not self.data_select2.isChecked() and \
                            not self.data_select1.isChecked() and \
                            self.data_select3.isChecked())
+
+    def BaseValue(self):
+        pass
 
     def ConnectSensor(self):
         # Timer to data collect
@@ -461,7 +492,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Reset recipe
         self.step_tracker = 0  # Set step tracker to 0 to run recipe from start
 
-        self.current_time_counter.setText("Waiting for start of experiment")
+        self.current_time_counter.setText("")
         self.duration_counter.setText("")
         self.step_counter.setText("")
         self.duration_next.setText("")
@@ -647,4 +678,4 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(False)
         self.btn_reset.setEnabled(False)
-        self.btn_experiment.setEnabled(False)
+        # self.btn_experiment.setEnabled(False)

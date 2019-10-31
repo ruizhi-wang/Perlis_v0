@@ -1,47 +1,60 @@
-# import sys
-# from PyQt5 import QtGui, QtWidgets
-# from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox
-# from PyQt5.QtGui import QIcon
-# from PyQt5.QtCore import pyqtSlot
-#
-#
-# def window():
-#     app = QApplication(sys.argv)
-#     win = QWidget()
-#     button1 = QPushButton(win)
-#     button1.setText("Show dialog!")
-#     # button1 = QtWidgets.QPushButton('connect sensor')
-#     button1.move(50, 50)
-#     button1.clicked.connect(showDialog)
-#     win.setWindowTitle("Click button")
-#     win.show()
-#     sys.exit(app.exec_())
-#
-#
-# def showDialog():
-#     msgBox = QMessageBox()
-#     msgBox.setIcon(QMessageBox.Information)
-#     msgBox.setText("Message box pop up window")
-#     msgBox.setWindowTitle("QMessageBox Example")
-#     msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-#     msgBox.buttonClicked.connect(msgButtonClick)
-#
-#     returnValue = msgBox.exec()
-#     if returnValue == QMessageBox.Ok:
-#         print('OK clicked')
-#
-#
-# def msgButtonClick(i):
-#     print("Button clicked is:", i.text())
-#
-#
-# if __name__ == '__main__':
-#     window()
-
-print("a \nb")
+import sys
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import pyqtSlot
 
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-import time
+class App(QWidget):
 
-print(time.time())
+    def __init__(self):
+        super().__init__()
+        self.title = 'PyQt5 table - pythonspot.com'
+        self.left = 0
+        self.top = 0
+        self.width = 300
+        self.height = 200
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+
+        self.createTable()
+
+        # Add box layout, add table to box layout and add box layout to widget
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.tableWidget)
+        self.setLayout(self.layout)
+
+        # Show widget
+        self.show()
+
+    def createTable(self):
+        # Create table
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setRowCount(4)
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setItem(0, 0, QTableWidgetItem("Cell (1,1)"))
+        self.tableWidget.setItem(0, 1, QTableWidgetItem("Cell (1,2)"))
+        self.tableWidget.setItem(1, 0, QTableWidgetItem("Cell (2,1)"))
+        self.tableWidget.setItem(1, 1, QTableWidgetItem("Cell (2,2)"))
+        self.tableWidget.setItem(2, 0, QTableWidgetItem("Cell (3,1)"))
+        self.tableWidget.setItem(2, 1, QTableWidgetItem("Cell (3,2)"))
+        self.tableWidget.setItem(3, 0, QTableWidgetItem("Cell (4,1)"))
+        self.tableWidget.setItem(3, 1, QTableWidgetItem("Cell (4,2)"))
+        self.tableWidget.move(0, 0)
+
+        # table selection change
+        self.tableWidget.doubleClicked.connect(self.on_click)
+
+    @pyqtSlot()
+    def on_click(self):
+        print("\n")
+        for currentQTableWidgetItem in self.tableWidget.selectedItems():
+            print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = App()
+    sys.exit(app.exec_())

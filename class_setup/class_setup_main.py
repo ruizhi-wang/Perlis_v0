@@ -53,13 +53,14 @@ class Setup(QtWidgets.QMainWindow):
         self.layout = QtWidgets.QGridLayout()
         # self.layout.setRowStretch(6, 10)
         self.recipeTable = QTableWidget()
+        self.currentTable = QTableWidget()
         # Generate table with the recipe that has been passed in
-        self.generate_table()
+        self.generate_recipe_table()
 
         # Create layout
         self.setCentralWidget(QtWidgets.QWidget(self))
         self.centralWidget().setLayout(self.layout)
-        self.generate_table()
+        self.generate_recipe_table()
 
         # Populate widgets
         self.widgets()
@@ -126,14 +127,12 @@ class Setup(QtWidgets.QMainWindow):
 
         self.show()
 
-    def generate_table(self):
-        print(self.recipe)
+    def generate_recipe_table(self):
         # Create table
         self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
         self.recipeTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
-        self.recipeTable.setRowCount(len(self.recipe['step_txt']))
         self.recipeTable.setColumnCount(2)
-        self.recipeTable.setRowCount(5)
+        self.recipeTable.setRowCount(len(self.recipe['step_txt']))
 
         self.recipeTable.setHorizontalHeaderLabels(['Step Name', 'Time'])
         # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
@@ -144,7 +143,7 @@ class Setup(QtWidgets.QMainWindow):
         for row in range(len(self.recipe['step_txt'])):
             self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
             self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
-            row += 1
+            row+=1
 
         self.layout.addWidget(self.recipeTable, 6, 2, 2, 2)
         self.show()
@@ -194,9 +193,8 @@ class Setup(QtWidgets.QMainWindow):
 
         update_time = self.txt_step_time.text()
         self.recipe['step_time'].append(update_time)
-        print(self.recipe)
 
-        self.generate_table()
+        self.generate_recipe_table()
 
     def editor(self):
         self.textEdit = QtWidgets.QTextEdit()
@@ -237,7 +235,7 @@ class Setup(QtWidgets.QMainWindow):
                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
             self.recipe = {'step_txt': [], 'step_time': []}
-            self.generate_table()
+            self.generate_recipe_table()
         else:
             pass
 
