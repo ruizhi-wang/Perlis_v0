@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout, QMessageBox
+from PyQt5.QtGui import QPixmap
 import pyqtgraph as pg
 import numpy as np
 import serial
@@ -19,7 +20,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setGeometry(50, 50, 800, 600)
 
-        self.setWindowTitle('HexagonFab Recipe Experiment')
+        self.setWindowTitle('HexagonFab Analysis App - Protocol Experiment')
         self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
 
         #--------------------------------------------------------------------------------------------------------------
@@ -58,11 +59,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # Populate tool bar
         self.toolBar = self.addToolBar('Create')
 
-        self.returnHome = QtWidgets.QAction('Home', self)
-        self.returnHome.triggered.connect(self.PopUpHome)
-        self.toolBar.addAction(self.returnHome)
+        # self.returnHome = QtWidgets.QAction('Back', self)
+        # self.returnHome.triggered.connect(self.PopUpHome)
+        # self.toolBar.addAction(self.returnHome)
 
-        self.returnRecipe = QtWidgets.QAction('Recipe Setup', self)
+        self.returnRecipe = QtWidgets.QAction('< Back', self)
         self.returnRecipe.triggered.connect(self.PopUpSetup)
         self.toolBar.addAction(self.returnRecipe)
 
@@ -86,26 +87,45 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def widgets(self):
 
-        # Select the comport
-        self.com_label = QtGui.QLabel('Com Port : ')                # Create instance of QLabel
-        self.com_select = QtGui.QComboBox()                         # Create instance of QComboBox
-        for port in ['COM' + str(x) for x in range(12)]:
-            self.com_select.addItem(port)                           # Call Qt function addItem on self.com_select
-        # XXXX
-        self.com_select.currentIndexChanged.connect(self.SetPort)   # Call SetPort function to select com port
-        # XXXX
+        # HexagonFab Top Label
+        self.header_label = QtGui.QLabel('HexagonFab')
+        pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        pixmap = pixmap.scaledToWidth(100, 1)
+        self.header_label.setPixmap(pixmap)
+
+
+        # Protocol plan
+        self.lbl_recipe = QtGui.QLabel('Protocol')
+        self.lbl_recipe.setStyleSheet('font-weight: bold; padding-top:8;')
+
+        # Controls
+        self.control_label = QtGui.QLabel('Experiment Control')
+        self.control_label.setStyleSheet('font-weight: bold; padding-top:8;')
+
+        # Reader & sensor connection
+        self.settings_label = QtGui.QLabel('Reader & sensor connection')
+        self.settings_label.setStyleSheet('font-weight: bold; padding-top:8;')
+
 
         # Start connection & showing the graph
-        self.btn_connect = QtGui.QPushButton('connect sensor')  # Create instance of QPushButton
+        self.btn_connect = QtGui.QPushButton('Connect \n sensor')  # Create instance of QPushButton
+        self.btn_connect.setStyleSheet("height: 50")
+        self.btn_connect.setFixedWidth(80)
         self.btn_connect.clicked.connect(self.ConnectSensor)  # Call StartShowing function when start button pressed
         self.btn_connect.clicked.connect(self.PopUpConnect)  # Call popup function when start button pressed
 
         # Operating the experiment
-        self.btn_start = QtGui.QPushButton('start')  # Create instance of QPushButton
+        self.btn_start = QtGui.QPushButton('Start Experiment')  # Create instance of QPushButton
+        self.btn_start.setStyleSheet("background-color: #4933FF; color: white; height: 20;")
+        self.btn_start.setFixedWidth(150)
         self.btn_start.pressed.connect(self.PopUpStart)  # Activate warning about experiment erased
-        self.btn_stop = QtGui.QPushButton('stop')
+        self.btn_stop = QtGui.QPushButton('Stop')
+        self.btn_stop.setStyleSheet("height: 20;")
+        self.btn_stop.setFixedWidth(80)
         self.btn_stop.clicked.connect(self.StopRecording)  # Call StopRecording function at button press
-        self.btn_reset = QtGui.QPushButton('reset')
+        self.btn_reset = QtGui.QPushButton('Reset')
+        self.btn_reset.setStyleSheet("height: 20;")
+        self.btn_reset.setFixedWidth(80)
         self.btn_reset.clicked.connect(self.PopUpReset)  # Call Reset function at button press
 
         # Label showing the experimental steps
@@ -116,11 +136,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.step_next = QtWidgets.QLabel()
 
         # Buttons to navigate the experiments
-        self.btn_experiment = QtWidgets.QPushButton("next")
+        self.btn_experiment = QtWidgets.QPushButton("next step >")
         self.btn_experiment.pressed.connect(self.StepExperiment) # Trigger next step in experimetn
         # Note text and connection
-        self.txt_note = QtGui.QLineEdit('note')  # Create instance of QLineEdit
-        self.btn_note = QtGui.QPushButton('add note')  # Create instance of QPushButton
+        self.txt_note = QtGui.QLineEdit('Write note...')  # Create instance of QLineEdit
+        self.btn_note = QtGui.QPushButton('Add note')  # Create instance of QPushButton
+        self.btn_note.setFixedWidth(80)
         self.btn_note.clicked.connect(self.AddNote)  # Call AddNote function at button press
 
         # Save, file and text widgets and connections
@@ -135,9 +156,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.data_select2 = QtGui.QCheckBox('Sensor2')  # Create instance of QCheckBox
         self.data_select3 = QtGui.QCheckBox('Averages')  # Create instance of QCheckBox
 
+        # Select the comport
+        self.com_label = QtGui.QLabel('Com Port')  # Create instance of QLabel
+        self.com_select = QtGui.QComboBox()  # Create instance of QComboBox
+        for port in ['COM' + str(x) for x in range(12)]:
+            self.com_select.addItem(port)  # Call Qt function addItem on self.com_select
+        # XXXX
+        self.com_select.currentIndexChanged.connect(self.SetPort)  # Call SetPort function to select com port
+        # XXXX
+
+        self.com_select.setFixedWidth(70)
+
         # No-points box
-        self.points_label = QtGui.QLabel('No data points : ')  # Create instance of QLabel
+        self.points_label = QtGui.QLabel('No data points')  # Create instance of QLabel
         self.txt_points = QtGui.QLineEdit('500')  # Create instance of QLineEdit
+        self.txt_points.setFixedWidth(70)
 
         # Define table
         self.recipeTable = QTableWidget()
@@ -167,8 +200,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.recipeTable.setRowCount(len(self.recipe['step_txt']))
         self.recipeTable.setColumnCount(2)
+        self.recipeTable.resizeRowsToContents()
 
-        self.recipeTable.setHorizontalHeaderLabels(['Step Name', 'Time'])
+        self.recipeTable.setHorizontalHeaderLabels(['Steps', 'Duration'])
         # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
         header = self.recipeTable.horizontalHeader()
         header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
@@ -202,48 +236,87 @@ class MainWindow(QtWidgets.QMainWindow):
     #     self.show()
 
     def display_widgets(self):
-        # Style
-        self.points_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.com_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
+        # Header label
+        self.layout.addWidget(self.header_label, 0, 0)
+
+
+        # Sidebar - Protocol
+
+        self.layout.addWidget(self.recipeTable, 2, 0, 1, 1)
+
+        # Sidebar - Protocol nav info
+        self.layout.addWidget(self.lbl_recipe, 3,0,1,1)
+        self.layout.addWidget(self.step_counter, 4, 0)
+        self.layout.addWidget(self.duration_counter, 5, 0)
+        self.layout.addWidget(self.current_time_counter, 6, 0)
+        self.layout.addWidget(self.btn_experiment, 7, 0)
+
+
+
+        # Main Window - Plot
+        self.layout.addWidget(self.plot,2 ,1 ,1 ,4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
+
+        # Main Window - Control experiment
+        self.layout.addWidget(self.control_label, 3, 1)
+
+        self.layout.addWidget(self.btn_stop, 4, 1)
+        self.layout.addWidget(self.btn_start, 4, 1, 1, 4, QtCore.Qt.AlignCenter)
+        self.layout.addWidget(self.btn_reset, 4, 4, QtCore.Qt.AlignRight)
+
+        self.layout.addWidget(self.txt_note, 5, 1, 1, 3)
+        self.layout.addWidget(self.btn_note, 5, 4)
+
+        # Main Window - Reader & Sensor connection
+        self.layout.addWidget(self.settings_label, 6,1)
+
+        self.layout.addWidget(self.data_select1, 7, 1)
+        self.layout.addWidget(self.data_select2, 8, 1)
+        self.layout.addWidget(self.data_select3, 9, 1)
+
+        self.layout.addWidget(self.txt_points, 7, 2)
+        self.layout.addWidget(self.points_label, 7, 3, QtCore.Qt.AlignLeft)
+
+        self.layout.addWidget(self.com_select, 8, 2)
+        self.layout.addWidget(self.com_label, 8, 3, QtCore.Qt.AlignLeft)
+
+        self.layout.addWidget(self.btn_connect, 7, 4,3,1)
+
+
+
+
+
+
+
+
+
+        # Style
         self.step_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.duration_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.current_time_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+
+
         # Build all widgets and set locations
 
-        self.layout.addWidget(self.data_select1, 0, 6)
-        self.layout.addWidget(self.data_select2, 1, 6)
-        self.layout.addWidget(self.data_select3, 2, 6)
 
-        self.layout.addWidget(self.btn_connect, 0, 7)
-        self.layout.addWidget(self.btn_start, 1, 7)
-        self.layout.addWidget(self.btn_stop, 2, 7)
-        self.layout.addWidget(self.btn_reset, 6, 7)
 
-        self.layout.addWidget(self.points_label, 0, 4)
-        self.layout.addWidget(self.txt_points, 0, 5)
 
-        self.layout.addWidget(self.com_label, 1, 4)
-        self.layout.addWidget(self.com_select, 1, 5)
 
-        self.layout.addWidget(self.txt_note, 8, 5, 1, 2)
-        self.layout.addWidget(self.btn_note, 8, 7)
 
-        self.layout.addWidget(self.plot, 3, 4, 3, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
+
+
         # self.layout.addWidget(self.btn_file, 4, 2)
         # self.layout.addWidget(self.txt_file, 4, 0, 1, 2)
         # self.layout.addWidget(self.btn_save, 4, 3)
         # --------------------------------------------
 
         # Assign widget locations based on grid layout
-        self.layout.addWidget(self.step_counter, 1, 1)
-        self.layout.addWidget(self.duration_counter, 1, 2)
-        self.layout.addWidget(self.current_time_counter, 2, 2)
-        self.layout.addWidget(self.btn_experiment, 5, 2)
+
+
         # self.layout.addWidget(self.duration_next, 7, 5)
         # self.layout.addWidget(self.step_next, 7, 3)
         # self.layout.addWidget(self.currentTable, 3, 0, 1, 3)
-        self.layout.addWidget(self.recipeTable, 3, 0, 2, 3)
+
 
         # self.generate_current_table()
         self.generate_recipe_table()
@@ -489,8 +562,8 @@ class MainWindow(QtWidgets.QMainWindow):
             'notes': [[0.0, 0.0, 'start_program']],
         }
 
-        # Reset recipe
-        self.step_tracker = 0  # Set step tracker to 0 to run recipe from start
+        # Reset Protocol
+        self.step_tracker = 0  # Set step tracker to 0 to run Protocol from start
 
         self.current_time_counter.setText("")
         self.duration_counter.setText("")
@@ -649,7 +722,7 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
 
     def PopUpSetup(self):
-        choice = QtWidgets.QMessageBox.question(self, 'Return', 'Are you sure you wish to return to Recipe Setup?',
+        choice = QtWidgets.QMessageBox.question(self, 'Return', 'Are you sure you wish to return to Protocol Setup?',
                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
             self.switch_setup()

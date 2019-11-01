@@ -79,7 +79,7 @@ class LandingWindow(QtWidgets.QMainWindow):
         # Freestyle experiment
         self.btn_test = QtWidgets.QPushButton('Express Experiment')
         self.btn_test.setFlat(True)
-        self.btn_test.setStyleSheet("height: 10;")
+        self.btn_test.setStyleSheet("height: 25;margin-bottom:200;margin-top:2;")
         self.btn_test.clicked.connect(self.SwitchTest)
 
     def display_widgets(self):
@@ -92,6 +92,8 @@ class LandingWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.btn_test, 3, 1, QtCore.Qt.AlignHCenter)
 
         self.show()
+
+
 
     def PathCreate(self):
         description = "Empty"
@@ -140,7 +142,7 @@ class LandingWindow(QtWidgets.QMainWindow):
 
     #-------------------------------------------------------------------------------------------------------------------
     def PopUpNew(self):
-        text_message = "Create new or load existing recipe?"
+        text_message = "Create new or load existing protocol?"
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
         msgBox.setText(text_message)

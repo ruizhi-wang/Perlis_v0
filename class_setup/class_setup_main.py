@@ -35,9 +35,10 @@ class Setup(QtWidgets.QMainWindow):
         self.return_home.triggered.connect(self.SwitchLanding)
         self.toolBar.addAction(self.return_home)
 
-        self.open_editor = QtWidgets.QAction('Text editor', self)
-        self.open_editor.triggered.connect(self.editor)
-        self.toolBar.addAction(self.open_editor)
+        # Text editor deactivated until important rationale for it is found :)
+        # self.open_editor = QtWidgets.QAction('Text editor', self)
+        # self.open_editor.triggered.connect(self.editor)
+        # self.toolBar.addAction(self.open_editor)
 
         self.closeWindow = QtWidgets.QAction('Close', self)
         self.closeWindow.setShortcut('Ctrl+W')
@@ -76,51 +77,49 @@ class Setup(QtWidgets.QMainWindow):
         self.header_label.setPixmap(pixmap)
 
 
-        self.lbl_description = QtWidgets.QLabel('Description')
-        self.lbl_description.setStyleSheet("font-weight:bold;")
+        self.lbl_description = QtWidgets.QLabel('Set up your protocol')
+        self.lbl_description.setStyleSheet("font-weight:bold;font-size:25;text-size:25;")
 
-        self.lbl_recipe = QtWidgets.QLabel('Recipe')
+        self.lbl_recipe = QtWidgets.QLabel('Protocol')
         self.lbl_recipe.setStyleSheet("font-weight:bold;")
 
 
         # User text input
-        self.txt_description = QtWidgets.QTextEdit('Add recipe description')
+        self.txt_description = QtWidgets.QTextEdit('Add protocol description')
         self.txt_description.setFixedHeight(50)
-        self.txt_step_name = QtWidgets.QLineEdit('Add name')
+        self.txt_step_name = QtWidgets.QLineEdit('Add step name...')
         self.txt_step_name.setStyleSheet("alignment:top;")
         self.txt_step_time = QtWidgets.QLineEdit("0")
 
         # #Heritage code - DO NOT DELETE - In case want to go back to create/load in this window
-        # # Create new recipe file
+        # # Create new protocol file
         # self.btn_create_project = QtWidgets.QPushButton(self.pass_val)
         # self.btn_create_project.clicked.connect(self.new)
         #
-        # # Load previous recipe
+        # # Load previous protocol
         # self.btn_load_project = QtWidgets.QPushButton('Load')
         # self.btn_load_project.clicked.connect(self.load)
 
         # Add step
         self.btn_step_add = QtWidgets.QPushButton('Add')
+        self.btn_step_add.setFixedWidth(40)
         self.btn_step_add.clicked.connect(self.add)
 
         # Reset
         self.btn_reset_recipe = QtWidgets.QPushButton('Reset')
-        self.btn_reset_recipe.setStyleSheet("height: 25;")
+        self.btn_reset_recipe.setStyleSheet("background-color: #6A3A3A; height: 25;margin-top:15;")
         self.btn_reset_recipe.setFixedWidth(100)
         self.btn_reset_recipe.clicked.connect(self.PopUpReset)
 
         # Save
         self.btn_save = QtWidgets.QPushButton('Save')
-        self.btn_save.setStyleSheet("height: 25;")
-        self.btn_save.setFixedWidth(100)
+        self.btn_save.setStyleSheet("height: 25;margin-top:15;")
+        self.btn_save.setFixedWidth(150)
         self.btn_save.clicked.connect(self.file_save)
 
         # Go to next window
         self.btn_start = QtWidgets.QPushButton("Continue >")
-        self.btn_start.setStyleSheet("background-color: #4933FF; \
-                                                      color: white; \
-                                                      height: 25; \
-                                                      ")
+        self.btn_start.setStyleSheet("background-color: #4933FF; color: white; height: 25;margin-top:15; ")
         self.btn_start.setFixedWidth(100)
         self.btn_start.pressed.connect(self.PopUpRun)
 
@@ -134,27 +133,27 @@ class Setup(QtWidgets.QMainWindow):
         # Description
         self.layout.addWidget(self.lbl_description, 2, 2, 1, 1)
 
-        self.layout.addWidget(self.txt_description, 4, 2, 1 ,2)
+        self.layout.addWidget(self.txt_description, 4, 2, 1 ,4)
 
-        # Recipe build
+        # Protocol build
 
         self.layout.addWidget(self.lbl_recipe, 5, 2)
 
         # self.layout.addWidget(self.lbl_step_name, 9, 2)
         # self.layout.addWidget(self.lbl_step_time, 9, 3)
-        self.layout.addWidget(self.txt_step_name, 13, 2,1,1)
-        self.layout.addWidget(self.txt_step_time, 13, 3,1,1)
+        self.layout.addWidget(self.txt_step_name, 13, 2,1,2)
+        self.layout.addWidget(self.txt_step_time, 13, 4,1,2)
 
 
 
         # Buttons
         # self.layout.addWidget(self.btn_create_project, 1, 2)
         # self.layout.addWidget(self.btn_load_project, 1, 3)
-        self.layout.addWidget(self.btn_step_add, 13, 4,1,1)
+        self.layout.addWidget(self.btn_step_add, 13, 5,1,1, QtCore.Qt.AlignRight)
         self.layout.addWidget(self.btn_reset_recipe, 16, 2,2,1)
 
-        self.layout.addWidget(self.btn_save, 16, 3,2,1, QtCore.Qt.AlignCenter)
-        self.layout.addWidget(self.btn_start, 16, 3,2,1, QtCore.Qt.AlignRight)
+        self.layout.addWidget(self.btn_save, 16, 2,2,4, QtCore.Qt.AlignCenter)
+        self.layout.addWidget(self.btn_start, 16, 5,2,1, QtCore.Qt.AlignRight)
 
         self.show()
 
@@ -179,7 +178,7 @@ class Setup(QtWidgets.QMainWindow):
         self.recipeTable.setFixedHeight(400)
         self.recipeTable.resizeRowsToContents()
 
-        self.layout.addWidget(self.recipeTable, 6, 2, 4, 2)
+        self.layout.addWidget(self.recipeTable, 6, 2, 4, 4)
 
         self.show()
 
@@ -266,7 +265,7 @@ class Setup(QtWidgets.QMainWindow):
     #     # self.btn_start.setEnabled(False)
 
     def PopUpReset(self):
-        choice = QtWidgets.QMessageBox.question(self, 'Reset', 'Are you sure you wish to reset the recipe?',
+        choice = QtWidgets.QMessageBox.question(self, 'Reset', 'Are you sure you wish to reset the protocol?',
                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
             self.recipe = {'step_txt': [], 'step_time': []}
@@ -275,7 +274,7 @@ class Setup(QtWidgets.QMainWindow):
             pass
 
     def PopUpRun(self):
-        text_message = "Ready to setup experiment?"
+        text_message = "Ready to set up experiment?"
 
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
