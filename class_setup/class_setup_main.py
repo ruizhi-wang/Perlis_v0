@@ -1,7 +1,7 @@
 import os
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog, QHeaderView, QMessageBox
 
 
@@ -9,7 +9,7 @@ class Setup(QtWidgets.QMainWindow):
     """
     Class that defines setup window in reader UI.
     """
-    # Define switch window as a type of pyqtSignal, i.e., once activated the window will be switched
+    # Define switch window1 as a type of pyqtSignal, i.e., once activated the window will be switched
     switch_mainwindow = QtCore.pyqtSignal(list)
     switch_landingwindow = QtCore.pyqtSignal()
 
@@ -22,7 +22,7 @@ class Setup(QtWidgets.QMainWindow):
         self.path = pass_val[1]
 
         # Dimensions and style of the window
-        self.setGeometry(50, 50, 600, 400)
+        self.setGeometry(50, 50, 800, 600)
         self.setWindowTitle('HexagonFab Experiment Setup')
         self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Plastique'))
@@ -31,7 +31,7 @@ class Setup(QtWidgets.QMainWindow):
         self.toolBar = self.addToolBar('Create')
 
         # Tool Bar - Define Actions
-        self.return_home = QtWidgets.QAction('Home', self)
+        self.return_home = QtWidgets.QAction('< Back', self)
         self.return_home.triggered.connect(self.SwitchLanding)
         self.toolBar.addAction(self.return_home)
 
@@ -68,15 +68,27 @@ class Setup(QtWidgets.QMainWindow):
 
     def widgets(self):
         # UI labels
-        self.lbl_description = QtWidgets.QLabel('Description:')
-        self.lbl_step_name = QtWidgets.QLabel('Step Name:')
-        self.lbl_step_time = QtWidgets.QLabel('Step Time [s]:')
-        self.lbl_recipe = QtWidgets.QLabel('Recipe:')
+
+        # HexagonFab Top Label
+        self.header_label = QtGui.QLabel('HexagonFab')
+        pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        pixmap = pixmap.scaledToWidth(100, 1)
+        self.header_label.setPixmap(pixmap)
+
+
+        self.lbl_description = QtWidgets.QLabel('Description')
+        self.lbl_description.setStyleSheet("font-weight:bold;")
+
+        self.lbl_recipe = QtWidgets.QLabel('Recipe')
+        self.lbl_recipe.setStyleSheet("font-weight:bold;")
+
 
         # User text input
-        self.txt_description = QtWidgets.QTextEdit('Add a description for the recipe')
-        self.txt_step_name = QtWidgets.QLineEdit('Add protein1')
-        self.txt_step_time = QtWidgets.QLineEdit("100")
+        self.txt_description = QtWidgets.QTextEdit('Add recipe description')
+        self.txt_description.setFixedHeight(50)
+        self.txt_step_name = QtWidgets.QLineEdit('Add name')
+        self.txt_step_name.setStyleSheet("alignment:top;")
+        self.txt_step_time = QtWidgets.QLineEdit("0")
 
         # #Heritage code - DO NOT DELETE - In case want to go back to create/load in this window
         # # Create new recipe file
@@ -93,37 +105,56 @@ class Setup(QtWidgets.QMainWindow):
 
         # Reset
         self.btn_reset_recipe = QtWidgets.QPushButton('Reset')
+        self.btn_reset_recipe.setStyleSheet("height: 25;")
+        self.btn_reset_recipe.setFixedWidth(100)
         self.btn_reset_recipe.clicked.connect(self.PopUpReset)
 
         # Save
         self.btn_save = QtWidgets.QPushButton('Save')
+        self.btn_save.setStyleSheet("height: 25;")
+        self.btn_save.setFixedWidth(100)
         self.btn_save.clicked.connect(self.file_save)
 
         # Go to next window
-        self.btn_start = QtWidgets.QPushButton("Run Recipe")
+        self.btn_start = QtWidgets.QPushButton("Continue >")
+        self.btn_start.setStyleSheet("background-color: #4933FF; \
+                                                      color: white; \
+                                                      height: 25; \
+                                                      ")
+        self.btn_start.setFixedWidth(100)
         self.btn_start.pressed.connect(self.PopUpRun)
+
 
     def display_widgets(self):
         # Assign widget locations based on grid layout
 
-        # Text labels
-        self.layout.addWidget(self.lbl_description, 2, 1)
-        self.layout.addWidget(self.lbl_step_name, 4, 2)
-        self.layout.addWidget(self.lbl_step_time, 4, 3)
-        self.layout.addWidget(self.lbl_recipe, 6, 1)
+        # HexagonFab label
+        self.layout.addWidget(self.header_label, 1, 2, 1, 1)
 
-        # Line edits
-        self.layout.addWidget(self.txt_description, 2, 2, 2, 2)
-        self.layout.addWidget(self.txt_step_name, 5, 2)
-        self.layout.addWidget(self.txt_step_time, 5, 3)
+        # Description
+        self.layout.addWidget(self.lbl_description, 2, 2, 1, 1)
+
+        self.layout.addWidget(self.txt_description, 4, 2, 1 ,2)
+
+        # Recipe build
+
+        self.layout.addWidget(self.lbl_recipe, 5, 2)
+
+        # self.layout.addWidget(self.lbl_step_name, 9, 2)
+        # self.layout.addWidget(self.lbl_step_time, 9, 3)
+        self.layout.addWidget(self.txt_step_name, 13, 2,1,1)
+        self.layout.addWidget(self.txt_step_time, 13, 3,1,1)
+
+
 
         # Buttons
         # self.layout.addWidget(self.btn_create_project, 1, 2)
         # self.layout.addWidget(self.btn_load_project, 1, 3)
-        self.layout.addWidget(self.btn_step_add, 5, 4)
-        self.layout.addWidget(self.btn_reset_recipe, 6, 4)
-        self.layout.addWidget(self.btn_save, 8, 2)
-        self.layout.addWidget(self.btn_start, 8, 3)
+        self.layout.addWidget(self.btn_step_add, 13, 4,1,1)
+        self.layout.addWidget(self.btn_reset_recipe, 16, 2,2,1)
+
+        self.layout.addWidget(self.btn_save, 16, 3,2,1, QtCore.Qt.AlignCenter)
+        self.layout.addWidget(self.btn_start, 16, 3,2,1, QtCore.Qt.AlignRight)
 
         self.show()
 
@@ -134,7 +165,7 @@ class Setup(QtWidgets.QMainWindow):
         self.recipeTable.setColumnCount(2)
         self.recipeTable.setRowCount(len(self.recipe['step_txt']))
 
-        self.recipeTable.setHorizontalHeaderLabels(['Step Name', 'Time'])
+        self.recipeTable.setHorizontalHeaderLabels(['Step', 'Duration'])
         # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
         header = self.recipeTable.horizontalHeader()
         header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
@@ -145,7 +176,11 @@ class Setup(QtWidgets.QMainWindow):
             self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
             row+=1
 
-        self.layout.addWidget(self.recipeTable, 6, 2, 2, 2)
+        self.recipeTable.setFixedHeight(400)
+        self.recipeTable.resizeRowsToContents()
+
+        self.layout.addWidget(self.recipeTable, 6, 2, 4, 2)
+
         self.show()
 
         # table selection change
@@ -240,17 +275,17 @@ class Setup(QtWidgets.QMainWindow):
             pass
 
     def PopUpRun(self):
-        text_message = "Set up experiment with the current recipe? \n (You will be asked to connect the sensor in the next step)"
+        text_message = "Ready to setup experiment?"
 
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
         msgBox.setText(text_message)
         msgBox.setWindowTitle("QMessageBox Example")
-        msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
 
         returnValue = msgBox.exec()
 
-        if returnValue == QMessageBox.Ok:
+        if returnValue == QMessageBox.Yes:
             self.file_save()
             self.SwitchMain()
         else:

@@ -86,7 +86,7 @@ class TestWindow(QtWidgets.QMainWindow):
 
         # Start connection & showing the graph
         self.btn_connect = QtGui.QPushButton('Connect \n sensor')  # Create instance of QPushButton
-        # self.btn_connect.setFixedWidth(70)
+        self.btn_connect.setFixedWidth(70)
         self.btn_connect.setFixedHeight(80)
 
 
@@ -112,6 +112,7 @@ class TestWindow(QtWidgets.QMainWindow):
         self.txt_note = QtGui.QLineEdit('Type note here')  # Create instance of QLineEdit
         self.btn_note = QtGui.QPushButton('add note')  # Create instance of QPushButton
         self.btn_note.clicked.connect(self.AddNote)  # Call AddNote function at button press
+        self.btn_note.setFixedWidth(80)
 
         # Save, file and text widgets and connections
         self.txt_file = QtGui.QLineEdit('file_name')  # Create instance of QLineEdit
@@ -136,12 +137,14 @@ class TestWindow(QtWidgets.QMainWindow):
         #     self.com_select.addItem(port)  # Call Qt function addItem on self.com_select
         # self.com_select.currentIndexChanged.connect(self.SetPort)  # Call SetPort function to select com port
 
-        # Labels & lines
+        # HexagonFab Top Label
         self.header_label = QtGui.QLabel('HexagonFab')
-        # self.header_label.setStyleSheet('background-color: #121212; font-weight: bold; padding-top:8;height:30')
         pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
         pixmap = pixmap.scaledToWidth(100, 1)
         self.header_label.setPixmap(pixmap)
+
+
+        #Controls
 
         self.control_label = QtGui.QLabel('Experiment Control')
         self.control_label.setStyleSheet('font-weight: bold; padding-top:8;')
