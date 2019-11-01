@@ -20,7 +20,7 @@ class LandingWindow(QtWidgets.QMainWindow):
         self.recipe = {'step_txt': [], 'step_time': []}
 
         # Dimensions and style of the window
-        self.setGeometry(50, 50, 600, 400)
+        self.setGeometry(50, 50, 800, 600)
         self.setWindowTitle('HexagonFab Analysis App')
         self.setWindowIcon(QtGui.QIcon('HexagonFab_RGB.jpg'))
         QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Plastique'))
@@ -29,9 +29,9 @@ class LandingWindow(QtWidgets.QMainWindow):
         self.toolBar = self.addToolBar('Create')
 
         # Tool Bar - Define Actions
-        self.return_home = QtWidgets.QAction('Home', self)
-        self.return_home.triggered.connect(self.main_window)
-        self.toolBar.addAction(self.return_home)
+        # self.return_home = QtWidgets.QAction('Home', self)
+        # self.return_home.triggered.connect(self.main_window)
+        # self.toolBar.addAction(self.return_home)
 
         self.closeWindow = QtWidgets.QAction('Close', self)
         self.closeWindow.setShortcut('Ctrl+W')
@@ -68,7 +68,7 @@ class LandingWindow(QtWidgets.QMainWindow):
         self.logo.setPixmap(pixmap)
 
         # Create new recipe file
-        self.btn_create_project = QtWidgets.QPushButton('Create new experiment')
+        self.btn_create_project = QtWidgets.QPushButton('Set up experiment')
         self.btn_create_project.setStyleSheet("background-color: #4933FF; \
                                               color: white; \
                                               height: 25; \
@@ -77,7 +77,7 @@ class LandingWindow(QtWidgets.QMainWindow):
         self.btn_create_project.clicked.connect(self.PopUpNew)
 
         # Freestyle experiment
-        self.btn_test = QtWidgets.QPushButton('Test Experiment')
+        self.btn_test = QtWidgets.QPushButton('Express Experiment')
         self.btn_test.setFlat(True)
         self.btn_test.setStyleSheet("height: 10;")
         self.btn_test.clicked.connect(self.SwitchTest)
@@ -140,12 +140,12 @@ class LandingWindow(QtWidgets.QMainWindow):
 
     #-------------------------------------------------------------------------------------------------------------------
     def PopUpNew(self):
-        text_message = "Would you like to create a new recipe or load an existing one?"
+        text_message = "Create new or load existing recipe?"
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
         msgBox.setText(text_message)
-        msgBox.addButton("Create Recipe", QMessageBox.ActionRole)
-        msgBox.addButton("Load Recipe", QMessageBox.AcceptRole)
+        msgBox.addButton("Create", QMessageBox.ActionRole)
+        msgBox.addButton("Load", QMessageBox.AcceptRole)
         returnValue = msgBox.exec()
 
 
