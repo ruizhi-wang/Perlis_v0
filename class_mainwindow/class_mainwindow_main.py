@@ -127,6 +127,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_reset.setStyleSheet("height: 20;")
         self.btn_reset.setFixedWidth(80)
         self.btn_reset.clicked.connect(self.PopUpReset)  # Call Reset function at button press
+        self.btn_baseline = QtGui.QPushButton('Baseline')
+        self.btn_baseline.setStyleSheet("height: 20;")
+        self.btn_baseline.setFixedWidth(80)
+        self.btn_baseline.clicked.connect(self.BaseValue)  # Call Reset function at button press
+
 
         # Label showing the experimental steps
         self.current_time_counter = QtWidgets.QLabel("Time remaining \n -")
@@ -214,27 +219,6 @@ class MainWindow(QtWidgets.QMainWindow):
             row += 1
         self.show()
 
-    # def generate_current_table(self):
-    #     # Create table
-    #     # self.currentTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-    #     # self.currentTable.verticalHeader().hide() # hide vertical/row headers
-    #     self.currentTable.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-    #     self.currentTable.setColumnCount(2)
-    #     self.currentTable.setRowCount(1)
-    #
-    #     self.currentTable.setHorizontalHeaderLabels(['Current Step', 'Time'])
-    #     number = self.currentTable.verticalHeader()
-    #     number.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-    #     # self.currentTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
-    #     header = self.currentTable.horizontalHeader()
-    #     header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-    #     header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
-    #
-    #     self.currentTable.setItem(0, 0, QTableWidgetItem(self.recipe['step_txt'][self.step_tracker]))
-    #     self.currentTable.setItem(0, 1, QTableWidgetItem(self.recipe['step_time'][self.step_tracker]))
-    #
-    #     self.show()
-
     def display_widgets(self):
 
         # Header label
@@ -252,8 +236,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.current_time_counter, 6, 0)
         self.layout.addWidget(self.btn_experiment, 7, 0)
 
-
-
         # Main Window - Plot
         self.layout.addWidget(self.plot,2 ,1 ,1 ,4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
@@ -263,6 +245,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.btn_stop, 4, 1)
         self.layout.addWidget(self.btn_start, 4, 1, 1, 4, QtCore.Qt.AlignCenter)
         self.layout.addWidget(self.btn_reset, 4, 4, QtCore.Qt.AlignRight)
+        self.layout.addWidget(self.btn_baseline, 4, 3, QtCore.Qt.AlignRight)
 
         self.layout.addWidget(self.txt_note, 5, 1, 1, 3)
         self.layout.addWidget(self.btn_note, 5, 4)
@@ -282,27 +265,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.layout.addWidget(self.btn_connect, 7, 4,3,1)
 
-
-
-
-
-
-
-
-
         # Style
         self.step_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.duration_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.current_time_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-
-
-        # Build all widgets and set locations
-
-
-
-
-
-
 
 
         # self.layout.addWidget(self.btn_file, 4, 2)
@@ -424,10 +390,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Communicate with Arduino to receive data
     def UpdateGraph(self):
-        d1 = [x[2] for x in self.data['data1']] # x[2] is an array with all the values recorded for channel 1
-        d2 = [x[2] for x in self.data['data2']]
-        d3 = [x[2] for x in self.data['data3']]
-        d4 = [x[2] for x in self.data['data4']]
+        d1 = np.array([x[2] for x in self.data['data1']])/self.baseline[0] # x[2] is an array with all the values recorded for channel 1
+        d2 = np.array([x[2] for x in self.data['data2']])/self.baseline[1]
+        d3 = np.array([x[2] for x in self.data['data3']])/self.baseline[2]
+        d4 = np.array([x[2] for x in self.data['data4']])/self.baseline[3]
         d_avg1 = (np.array(d1) + np.array(d2)) / 2
         d_avg2 = (np.array(d3) + np.array(d4)) / 2
 
@@ -472,7 +438,23 @@ class MainWindow(QtWidgets.QMainWindow):
                            self.data_select3.isChecked())
 
     def BaseValue(self):
-        pass
+        d1 = np.array([x[2] for x in self.data['data1']])
+        d2 = np.array([x[2] for x in self.data['data2']])
+        d3 = np.array([x[2] for x in self.data['data3']])
+        d4 = np.array([x[2] for x in self.data['data4']])
+
+        len_d1 = len(d1)
+        len_d2 = len(d2)
+        len_d3 = len(d3)
+        len_d4 = len(d4)
+
+        print(np.average(d1[len_d1-10:len_d1]))
+        print(np.average(d2[len_d2 - 10:len_d2]))
+        print(np.average(d3[len_d3 - 10:len_d3]))
+        print(np.average(d4[len_d4 - 10:len_d4]))
+
+        self.baseline = [np.average(d1[len_d1-10:len_d1]), np.average(d2[len_d2 - 10:len_d2]), np.average(d3[len_d3 - 10:len_d3]), np.average(d4[len_d4 - 10:len_d4])]
+
 
     def ConnectSensor(self):
         # Timer to data collect
@@ -570,6 +552,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.step_counter.setText("")
         self.duration_next.setText("")
         self.step_next.setText("")
+        
+        self.baseline = [1, 1, 1, 1] 
 
         # Disable all buttons except connect
         self.BtnDisable()
