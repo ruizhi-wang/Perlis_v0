@@ -83,7 +83,6 @@ class Setup(QtWidgets.QMainWindow):
 
         self.lbl_step_name = QtWidgets.QLabel('Input step name')
         self.lbl_step_name.setStyleSheet("font-weight:bold;")
-
         self.lbl_step_time = QtWidgets.QLabel('Step time')
         self.lbl_step_time.setStyleSheet("font-weight:bold;")
 
@@ -152,7 +151,6 @@ class Setup(QtWidgets.QMainWindow):
         # self.layout.addWidget(self.btn_step_add, 14, 5, 1, 1, QtCore.Qt.AlignRight)
         self.layout.addWidget(self.btn_step_add, 14, 5, 1, 1, QtCore.Qt.AlignCenter)
         self.layout.addWidget(self.btn_reset_recipe, 16, 2, 2, 1)
-
         self.layout.addWidget(self.btn_save, 16, 2, 2, 4, QtCore.Qt.AlignCenter)
         self.layout.addWidget(self.btn_start, 16, 5, 2, 1, QtCore.Qt.AlignRight)
 

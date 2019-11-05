@@ -53,7 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
             'data2': [],
             'data3': [],
             'data4': [],
-            'notes': [[0.0, 0.0, 'start_program']],
+            'notes': [],
         }
 
         self.display_no = 500  # Initial amount of data points displayed
@@ -229,8 +229,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
             row += 1
         try:
-            self.recipeTable.item(self.step_tracker, 0).setBackground(QtGui.QColor(180, 1, 1))
-            self.recipeTable.item(self.step_tracker, 1).setBackground(QtGui.QColor(180, 1, 1))
+            self.recipeTable.item(self.step_tracker-1, 0).setBackground(QtGui.QColor(180, 1, 1))
+            self.recipeTable.item(self.step_tracker-1, 1).setBackground(QtGui.QColor(180, 1, 1))
         except:
             pass
 
@@ -256,6 +256,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Main Window - Plot
         self.layout.addWidget(self.plot, 2, 2, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
+
 
         # Main Window - Control experiment
         self.layout.addWidget(self.control_label, 3, 1)
@@ -604,7 +605,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         with open(msg+'_notes.txt','w+') as f:
             for note in self.data['notes']:
-                f.write(str(note[0]) +' : '+ note[2]+'\n')
+                f.write(str(note[1]) +' : '+ note[2]+'\n')
 
     def AddNote(self):
         msg = self.txt_note.text()
@@ -662,8 +663,21 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.go_state:
             self.ard.write(b'1')
             msg = self.ard.readline()[0:-2].decode("utf-8")
-            print(msg)
-            text_message = "Sensor resistance values: " + str(msg)
+            msg = msg.split(',')
+            
+            sensor1_status = "Disconnected"
+            sensor2_status = "Disconnected"
+            
+            
+            if float(msg[0])>200 and float(msg[0])<5000 and float(msg[1])>200 and float(msg[1])<5000:
+                sensor1_status = "Connected"
+            if float(msg[2])>200 and float(msg[2])<5000 and float(msg[3])>200 and float(msg[3])<5000:
+                sensor2_status = "Connected"
+            
+            text_message = ("Sensor status: \n" 
+                                +"Sensor 1: " + sensor1_status + "\n"
+                                +"Sensor 2: " + sensor2_status + "\n"
+                                )
         else:
             msg = "incorrect com-port"
             text_message = msg
@@ -677,8 +691,14 @@ class MainWindow(QtWidgets.QMainWindow):
         returnValue = msgBox.exec()
 
         if returnValue == QMessageBox.Ok:
+            self.sensor1_status = sensor1_status
+            self.sensor2_status = sensor2_status
             if self.go_state:
                 self.BtnEnable()
+                
+        if returnValue == QMessageBox.Cancel:
+            self.Reset()
+            
 
     def PopUpStep(self):
         try:
@@ -732,7 +752,7 @@ class MainWindow(QtWidgets.QMainWindow):
         returnValue = msgBox.exec()
 
     def PopUpStart(self):
-        text_message = "Start Experiment - All previous data will be erased"
+        text_message = "Start Experiment (All previous data will be erased): \n\n " + str(self.recipe["step_txt"][0])
 
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
@@ -744,8 +764,29 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if returnValue == QMessageBox.Ok:
             self.BaseValue()
+            
+            # Reset data storage
+            self.data = {
+                'data1': [],
+                'data2': [],
+                'data3': [],
+                'data4': [],
+                'notes': [],
+            }
+            
             self.StartRecording() # Call StartRecording function when ok button pressed
             self.StepExperiment() # Trigger first step in experiment
+            
+            # Save the current recipe step into the notes
+            recipe_step = str(self.recipe["step_txt"][0])
+            try:
+                time_true = time.time() - self.time_start_true
+                time_sincestart = time.time() - self.time_start
+            except:
+                time_true = 0
+                time_sincestart = 0
+
+            self.data['notes'].append([time_true, time_sincestart, recipe_step])
         
     def PopUpReset(self):
         text_message = "All data will be erased"
