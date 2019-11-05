@@ -224,9 +224,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
             self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
             row += 1
-
-        self.recipeTable.item(self.step_tracker, 0).setBackground(QtGui.QColor(180, 1, 1))
-        self.recipeTable.item(self.step_tracker, 1).setBackground(QtGui.QColor(180, 1, 1))
+        try:
+            self.recipeTable.item(self.step_tracker, 0).setBackground(QtGui.QColor(180, 1, 1))
+            self.recipeTable.item(self.step_tracker, 1).setBackground(QtGui.QColor(180, 1, 1))
+        except:
+            pass
 
         self.show()
 
@@ -624,13 +626,11 @@ class MainWindow(QtWidgets.QMainWindow):
     # -------------------------------------------------------------------------------------------------------------------
     # Definition of PopUps
     def PopUpConnect(self):
-#        resistance_list=self.resistance_val.split(',')
-        # text_message = "Sensor resistance values \n"\
-        #                +"Sensor 1 - Ch1: "+resistance_list[0]+"\n"+"Sensor 1 - Ch2: "+resistance_list[1]+"\n"+"Sensor 2 - Ch3: "+resistance_list[2]+"\n"+"Sensor 2 - Ch4: "+resistance_list[3]
         if self.go_state:
+            self.ard.write(b'1')
             msg = self.ard.readline()[0:-2].decode("utf-8")
             print(msg)
-            text_message = "Sensor resistance values: " + msg
+            text_message = "Sensor resistance values: " + str(msg)
         else:
             msg = "incorrect com-port"
             text_message = msg
@@ -657,6 +657,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # Define text in message box
             msgBox = QMessageBox()
             msgBox.setIcon(QMessageBox.Information)
+
             # For some weird reason, but the time self.step_tracker has been passed in, it has already increased by 1
             if current_step < len(self.recipe["step_time"]):
                 msgBox.setText(str(self.recipe["step_txt"][current_step]))
@@ -666,9 +667,21 @@ class MainWindow(QtWidgets.QMainWindow):
 
             msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
 
-
             returnValue = msgBox.exec()
             if returnValue == QMessageBox.Ok:
+
+                # Save the current recipe step into the notes
+                recipe_step = str(self.recipe["step_txt"][current_step])
+                try:
+                    time_true = time.time() - self.time_start_true
+                    time_sincestart = time.time() - self.time_start
+                except:
+                    time_true = 0
+                    time_sincestart = 0
+
+                self.data['notes'].append([time_true, time_sincestart, recipe_step])
+
+                # Go to the next step in the experiment
                 self.StepExperiment()
 
         except:
@@ -753,4 +766,4 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(False)
         self.btn_reset.setEnabled(False)
-        # self.btn_experiment.setEnabled(False)
+        self.btn_experiment.setEnabled(False)
