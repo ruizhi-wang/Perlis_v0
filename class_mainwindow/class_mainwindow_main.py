@@ -5,25 +5,27 @@ from PyQt5.QtGui import QPixmap
 import pyqtgraph as pg
 import numpy as np
 import serial
+import serial.tools.list_ports
 import time
 
-# Comment to check
-# Another comment to check
 
 class MainWindow(QtWidgets.QMainWindow):
-
+    """
+    Class that defines main window for experiments.
+    """
     switch_landingwindow = QtCore.pyqtSignal()
     switch_setupwindow = QtCore.pyqtSignal(list)
 
     def __init__(self, pass_value):
         super(MainWindow, self).__init__()
 
-        self.setGeometry(50, 50, 800, 600)
+        self.setGeometry(50, 50, 1000, 600)
 
         self.setWindowTitle('HexagonFab Analysis App - Protocol Experiment')
         self.setWindowIcon(QtGui.QIcon('HexFab_logo.png'))
 
-        #--------------------------------------------------------------------------------------------------------------
+        # -------------------------------------------------------------------------------------------------------------
+
         # Helper variables
         # Initialize the time counter for displaying the remaining time of the step
         self.counter = 0
@@ -197,53 +199,39 @@ class MainWindow(QtWidgets.QMainWindow):
     def generate_recipe_table(self):
         # Create table
         self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-        self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        # setSizePolicy controls general sizing features for each column
+        # self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.recipeTable.setRowCount(len(self.recipe['step_txt']))
         self.recipeTable.setColumnCount(2)
         self.recipeTable.resizeRowsToContents()
+        # self.recipeTable.resizeColumnsToContents()
 
         self.recipeTable.setHorizontalHeaderLabels(['Steps', 'Duration'])
         # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
         header = self.recipeTable.horizontalHeader()
         header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        # header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setStretchLastSection(False)
 
         for row in range(len(self.recipe['step_txt'])):
             self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
             self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
             row += 1
-        self.show()
 
-    # def generate_current_table(self):
-    #     # Create table
-    #     # self.currentTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-    #     # self.currentTable.verticalHeader().hide() # hide vertical/row headers
-    #     self.currentTable.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-    #     self.currentTable.setColumnCount(2)
-    #     self.currentTable.setRowCount(1)
-    #
-    #     self.currentTable.setHorizontalHeaderLabels(['Current Step', 'Time'])
-    #     number = self.currentTable.verticalHeader()
-    #     number.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-    #     # self.currentTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
-    #     header = self.currentTable.horizontalHeader()
-    #     header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-    #     header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
-    #
-    #     self.currentTable.setItem(0, 0, QTableWidgetItem(self.recipe['step_txt'][self.step_tracker]))
-    #     self.currentTable.setItem(0, 1, QTableWidgetItem(self.recipe['step_time'][self.step_tracker]))
-    #
-    #     self.show()
+        self.recipeTable.item(self.step_tracker, 0).setBackground(QtGui.QColor(180, 1, 1))
+        self.recipeTable.item(self.step_tracker, 1).setBackground(QtGui.QColor(180, 1, 1))
+
+        self.show()
 
     def display_widgets(self):
 
         # Header label
         self.layout.addWidget(self.header_label, 0, 0)
 
-
         # Sidebar - Protocol
 
-        self.layout.addWidget(self.recipeTable, 2, 0, 1, 1)
+        self.layout.addWidget(self.recipeTable, 2, 0, 1, 2)
 
         # Sidebar - Protocol nav info
         self.layout.addWidget(self.lbl_recipe, 3,0,1,1)
@@ -255,7 +243,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         # Main Window - Plot
-        self.layout.addWidget(self.plot,2 ,1 ,1 ,4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
+        self.layout.addWidget(self.plot,2 ,2 ,1 ,4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
         # Main Window - Control experiment
         self.layout.addWidget(self.control_label, 3, 1)
@@ -375,6 +363,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.duration_next.setText("Time \n End of Experiment")
 
         self.step_tracker += 1
+        self.generate_recipe_table()
 
     # Communicate with Arduino to receive data
     def UpdateData(self):
@@ -617,7 +606,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def SetPort(self):
         self.port = self.com_select.currentText()
         print(self.port)
-
 
     # -------------------------------------------------------------------------------------------------------------------
     # Definition of PopUps
