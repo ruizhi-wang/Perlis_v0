@@ -97,10 +97,10 @@ class MainWindow(QtWidgets.QMainWindow):
         pixmap = pixmap.scaledToWidth(100, 1)
         self.header_label.setPixmap(pixmap)
 
-        self.sensor1_lbl = QtGui.QLabel('Sensor 1: ' + self.sensor1_status)
+        self.sensor1_lbl = QtGui.QLabel("Sensor 1: " + self.sensor1_status)
         self.sensor1_lbl.setStyleSheet('font-weight: bold; padding-top:8;')
 
-        self.sensor2_lbl = QtGui.QLabel('Sensor 2: ' + self.sensor2_status)
+        self.sensor2_lbl = QtGui.QLabel("Sensor 2: " + self.sensor2_status)
         self.sensor2_lbl.setStyleSheet('font-weight: bold; padding-top:8;')
 
         # Protocol plan
@@ -693,6 +693,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if returnValue == QMessageBox.Ok:
             self.sensor1_status = sensor1_status
             self.sensor2_status = sensor2_status
+            
+            self.sensor1_lbl.setText("Sensor 1: " + str(self.sensor1_status))
+            self.sensor2_lbl.setText("Sensor 2: " + str(self.sensor2_status))
             if self.go_state:
                 self.BtnEnable()
                 
