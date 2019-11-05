@@ -53,9 +53,9 @@ class Setup(QtWidgets.QMainWindow):
         # Initialize layout for widgets
         self.layout = QtWidgets.QGridLayout()
         # self.layout.setRowStretch(6, 10)
+
         self.recipeTable = QTableWidget()
-        self.currentTable = QTableWidget()
-        # Generate table with the recipe that has been passed in
+        # Generate table with recipe
         self.generate_recipe_table()
 
         # Create layout
@@ -67,9 +67,8 @@ class Setup(QtWidgets.QMainWindow):
         self.widgets()
         self.display_widgets()
 
+    # Initialize widgets
     def widgets(self):
-        # UI labels
-
         # HexagonFab Top Label
         self.header_label = QtGui.QLabel('HexagonFab')
         pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
@@ -84,14 +83,17 @@ class Setup(QtWidgets.QMainWindow):
 
         self.lbl_step_name = QtWidgets.QLabel('Input step name')
         self.lbl_step_name.setStyleSheet("font-weight:bold;")
+
         self.lbl_step_time = QtWidgets.QLabel('Step time')
         self.lbl_step_time.setStyleSheet("font-weight:bold;")
 
         # User text input
         self.txt_description = QtWidgets.QTextEdit('Add protocol description')
         self.txt_description.setFixedHeight(50)
+
         self.txt_step_name = QtWidgets.QLineEdit('Add step name...')
         self.txt_step_name.setStyleSheet("alignment:top;")
+
         self.txt_step_time = QtWidgets.QLineEdit("0")
 
         # #Heritage code - DO NOT DELETE - In case want to go back to create/load in this window
@@ -126,10 +128,8 @@ class Setup(QtWidgets.QMainWindow):
         self.btn_start.setFixedWidth(100)
         self.btn_start.pressed.connect(self.PopUpRun)
 
-
+    # Assign widget locations based on grid layout
     def display_widgets(self):
-        # Assign widget locations based on grid layout
-
         # HexagonFab label
         self.layout.addWidget(self.header_label, 1, 2, 1, 1)
 
@@ -156,10 +156,13 @@ class Setup(QtWidgets.QMainWindow):
         self.layout.addWidget(self.btn_save, 16, 2, 2, 4, QtCore.Qt.AlignCenter)
         self.layout.addWidget(self.btn_start, 16, 5, 2, 1, QtCore.Qt.AlignRight)
 
+        # Recipe table
+        self.layout.addWidget(self.recipeTable, 6, 2, 4, 4)
+
         self.show()
 
+    # Generate and populate table from user data
     def generate_recipe_table(self):
-        # Create table
         self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
         self.recipeTable.setRowCount(len(self.recipe['step_txt']))
         self.recipeTable.setColumnCount(2)
@@ -171,6 +174,7 @@ class Setup(QtWidgets.QMainWindow):
         header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
         #header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
+        # Populate table with recipe data
         for row in range(len(self.recipe['step_txt'])):
             self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
             self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
@@ -179,10 +183,21 @@ class Setup(QtWidgets.QMainWindow):
         self.recipeTable.setFixedHeight(400)
         self.recipeTable.resizeRowsToContents()
 
-        self.layout.addWidget(self.recipeTable, 6, 2, 4, 4)
+        # Update recipe file from direct user table input
+        self.recipeTable.itemChanged.connect(self.user_update)
 
         self.show()
 
+    # Update protocol based on direct changes to table
+    def user_update(self, item):
+        if item.column() == 0:
+            self.recipe['step_txt'][item.row()] = item.text()
+        elif item.column() == 1:
+            self.recipe['step_time'][item.row()] = item.text()
+        else:
+            pass
+
+    # Save data to file
     def file_save(self):
         try:
             file_path = self.path
@@ -219,6 +234,7 @@ class Setup(QtWidgets.QMainWindow):
     #     except:
     #         print('Load file error')
 
+    # Append recipe dictionary with user data; regenerate table
     def add(self):
         update_name = self.txt_step_name.text()
         self.recipe['step_txt'].append(update_name)
@@ -228,10 +244,12 @@ class Setup(QtWidgets.QMainWindow):
 
         self.generate_recipe_table()
 
+    # Open a text editor in the main window
     def editor(self):
         self.textEdit = QtWidgets.QTextEdit()
         self.setCentralWidget(self.textEdit)
 
+    # Exit main window
     def close_app(self):
         choice = QtWidgets.QMessageBox.question(self, 'Close', 'Are you sure you wish to exit?',
                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
@@ -287,4 +305,3 @@ class Setup(QtWidgets.QMainWindow):
             self.SwitchMain()
         else:
             pass
-

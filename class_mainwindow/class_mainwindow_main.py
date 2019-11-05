@@ -74,6 +74,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.closeWindow.triggered.connect(self.PopUpClose)
         self.toolBar.addAction(self.closeWindow)
 
+        self.sensor1_status = 'Disconnected'
+        self.sensor2_status = 'Disconnected'
 
         # Main UI
         self.main_window()
@@ -89,13 +91,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.display_widgets()
 
     def widgets(self):
-
         # HexagonFab Top Label
         self.header_label = QtGui.QLabel('HexagonFab')
         pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
         pixmap = pixmap.scaledToWidth(100, 1)
         self.header_label.setPixmap(pixmap)
 
+        self.sensor1_lbl = QtGui.QLabel('Sensor 1: ' + self.sensor1_status)
+        self.sensor1_lbl.setStyleSheet('font-weight: bold; padding-top:8;')
+
+        self.sensor2_lbl = QtGui.QLabel('Sensor 2: ' + self.sensor2_status)
+        self.sensor2_lbl.setStyleSheet('font-weight: bold; padding-top:8;')
 
         # Protocol plan
         self.lbl_recipe = QtGui.QLabel('Protocol')
@@ -134,7 +140,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_baseline.setStyleSheet("height: 20;")
         self.btn_baseline.setFixedWidth(80)
         self.btn_baseline.clicked.connect(self.BaseValue)  # Call Reset function at button press
-
 
         # Label showing the experimental steps
         self.current_time_counter = QtWidgets.QLabel("Time remaining \n -")
@@ -201,7 +206,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.l6 = self.plot.plot(pen=pg.mkPen('w', width=3, style=QtCore.Qt.DashLine))
 
         # --------------------------------------------
-
     def generate_recipe_table(self):
         # Create table
         self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
@@ -233,23 +237,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
     def display_widgets(self):
-
         # Header label
         self.layout.addWidget(self.header_label, 0, 0)
+
+        self.layout.addWidget(self.sensor1_lbl, 0, 3)
+        self.layout.addWidget(self.sensor2_lbl, 0, 5)
 
         # Sidebar - Protocol
 
         self.layout.addWidget(self.recipeTable, 2, 0, 1, 2)
 
         # Sidebar - Protocol nav info
-        self.layout.addWidget(self.lbl_recipe, 3,0,1,1)
+        self.layout.addWidget(self.lbl_recipe, 3, 0, 1, 1)
         self.layout.addWidget(self.step_counter, 4, 0)
         self.layout.addWidget(self.duration_counter, 5, 0)
         self.layout.addWidget(self.current_time_counter, 6, 0)
         self.layout.addWidget(self.btn_experiment, 7, 0)
 
         # Main Window - Plot
-        self.layout.addWidget(self.plot,2 ,2 ,1 ,4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
+        self.layout.addWidget(self.plot, 2, 2, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
         # Main Window - Control experiment
         self.layout.addWidget(self.control_label, 3, 1)
@@ -263,7 +269,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.btn_note, 5, 4)
 
         # Main Window - Reader & Sensor connection
-        self.layout.addWidget(self.settings_label, 6,1)
+        self.layout.addWidget(self.settings_label, 6, 1)
 
         self.layout.addWidget(self.data_select1, 7, 1)
         self.layout.addWidget(self.data_select2, 8, 1)
@@ -272,16 +278,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.txt_points, 7, 2)
         self.layout.addWidget(self.points_label, 7, 3, QtCore.Qt.AlignLeft)
 
-#        self.layout.addWidget(self.com_select, 8, 2)
-#        self.layout.addWidget(self.com_label, 8, 3, QtCore.Qt.AlignLeft)
+        #        self.layout.addWidget(self.com_select, 8, 2)
+        #        self.layout.addWidget(self.com_label, 8, 3, QtCore.Qt.AlignLeft)
 
-        self.layout.addWidget(self.btn_connect, 7, 4,3,1)
+        self.layout.addWidget(self.btn_connect, 7, 4, 3, 1)
 
         # Style
         self.step_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.duration_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.current_time_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-
 
         # self.layout.addWidget(self.btn_file, 4, 2)
         # self.layout.addWidget(self.txt_file, 4, 0, 1, 2)
@@ -290,17 +295,74 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Assign widget locations based on grid layout
 
-
         # self.layout.addWidget(self.duration_next, 7, 5)
         # self.layout.addWidget(self.step_next, 7, 3)
         # self.layout.addWidget(self.currentTable, 3, 0, 1, 3)
-
 
         # self.generate_current_table()
         self.generate_recipe_table()
         self.BtnDisable()
 
         self.show()
+
+    def generate_recipe_table(self):
+        # Create table
+        self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        # setSizePolicy controls general sizing features for each column
+        # self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.recipeTable.setRowCount(len(self.recipe['step_txt']))
+        self.recipeTable.setColumnCount(2)
+        self.recipeTable.resizeRowsToContents()
+        # self.recipeTable.resizeColumnsToContents()
+
+        self.recipeTable.setHorizontalHeaderLabels(['Steps', 'Duration'])
+        # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
+        header = self.recipeTable.horizontalHeader()
+        header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        # header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setStretchLastSection(False)
+
+        for row in range(len(self.recipe['step_txt'])):
+            self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
+            self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
+            row += 1
+
+        try:
+            self.recipeTable.item(self.step_tracker, 0).setBackground(QtGui.QColor(180, 1, 1))
+            self.recipeTable.item(self.step_tracker, 1).setBackground(QtGui.QColor(180, 1, 1))
+        except:
+            pass
+
+        self.show()
+
+    def ConnectSensor(self):
+        # Timer to data collect
+        self.timer = QtCore.QTimer()  # Create QTimer instance
+        self.timer.timeout.connect(self.UpdateData)  # Update data at constant time intervals
+
+        # Use automatic port finder to determine the port of the device
+        self.port = self.SetPort()
+        print(self.port)
+
+        try:
+            self.ard = serial.Serial(
+                port=self.port,
+                baudrate=500000,
+                timeout=2
+            )
+            time.sleep(2)
+            self.go_state = True
+            print('port set')
+        except:
+            self.go_state = False
+            print('port NOT set')
+
+        if self.go_state:
+            self.time_start = time.time()
+            self.time_start_true = time.time()  # Fix start time (i.e. so that difference with timer gives time passed)
+            self.timer.start(100)
+            self.save_state = False
 
     def timer_countdown_counter(self):
         # Timer to keep track of time passed for each period
@@ -449,35 +511,6 @@ class MainWindow(QtWidgets.QMainWindow):
                            not self.data_select2.isChecked() and \
                            not self.data_select1.isChecked() and \
                            self.data_select3.isChecked())
-
-        
-    def ConnectSensor(self):
-        # Timer to data collect
-        self.timer = QtCore.QTimer()  # Create QTimer instance
-        self.timer.timeout.connect(self.UpdateData)  # Update data at constant time intervals
-        
-        # Use automatic port finder to determine the port of the device
-        self.port=self.SetPort()
-        print(self.port)
-        
-        try:            
-            self.ard = serial.Serial(
-                port=self.port,
-                baudrate=500000,
-                timeout=2
-            )
-            time.sleep(2)
-            self.go_state = True
-            print('port set')
-        except:
-            self.go_state = False
-            print('port NOT set')
-        
-        if self.go_state:
-            self.time_start = time.time()
-            self.time_start_true = time.time()  # Fix start time (i.e. so that difference with timer gives time passed)
-            self.timer.start(100)
-            self.save_state = False
 
     def StartRecording(self):
         self.timer.timeout.connect(self.UpdateGraph)
