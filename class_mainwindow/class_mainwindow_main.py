@@ -5,6 +5,7 @@ from PyQt5.QtGui import QPixmap
 import pyqtgraph as pg
 import numpy as np
 import serial
+import serial.tools.list_ports
 import time
 
 # Comment to check
@@ -42,6 +43,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.save_timer = 0
 
         # Set initial baseline value
+        self.baseunit = 100
         self.baseline = [1, 1, 1, 1]
         
         # Setting up the data sets for saving and displaying
@@ -260,8 +262,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.txt_points, 7, 2)
         self.layout.addWidget(self.points_label, 7, 3, QtCore.Qt.AlignLeft)
 
-        self.layout.addWidget(self.com_select, 8, 2)
-        self.layout.addWidget(self.com_label, 8, 3, QtCore.Qt.AlignLeft)
+#        self.layout.addWidget(self.com_select, 8, 2)
+#        self.layout.addWidget(self.com_label, 8, 3, QtCore.Qt.AlignLeft)
 
         self.layout.addWidget(self.btn_connect, 7, 4,3,1)
 
@@ -355,25 +357,25 @@ class MainWindow(QtWidgets.QMainWindow):
             msg = msg.split(',')
             self.save_counter +=1
 
-            if float(msg[0]) > 0 and float(msg[0]) < 20000:
+            if float(msg[0]) > 10 and float(msg[0]) < 10000:
                 self.data['data1'].append([time_true, time_sincestart, float(msg[0])]) # Definition of self.data
             else:
-                self.data['data1'].append([time_true, time_sincestart, -1])
+                self.data['data1'].append([time_true, time_sincestart, 0])
 
-            if float(msg[1]) > 0 and float(msg[1]) < 20000:
+            if float(msg[1]) > 10 and float(msg[1]) < 10000:
                 self.data['data2'].append([time_true, time_sincestart, float(msg[1])])
             else:
-                self.data['data2'].append([time_true, time_sincestart, -1])
+                self.data['data2'].append([time_true, time_sincestart, 0])
 
-            if float(msg[2]) > 0 and float(msg[2]) < 20000:
+            if float(msg[2]) > 10 and float(msg[2]) < 10000:
                 self.data['data3'].append([time_true, time_sincestart, float(msg[2])])
             else:
-                self.data['data3'].append([time_true, time_sincestart, -1])
+                self.data['data3'].append([time_true, time_sincestart, 0])
 
-            if float(msg[3]) > 0 and float(msg[3]) < 20000:
+            if float(msg[3]) > 10 and float(msg[3]) < 10000:
                 self.data['data4'].append([time_true, time_sincestart, float(msg[3])])
             else:
-                self.data['data4'].append([time_true, time_sincestart, -1])
+                self.data['data4'].append([time_true, time_sincestart, 0])
 
             # self.data['data2'].append([time_true,time_sincestart,float(msg[1])])
             # self.data['data3'].append([time_true,time_sincestart,float(msg[2])])
@@ -390,10 +392,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Communicate with Arduino to receive data
     def UpdateGraph(self):
-        d1 = np.array([x[2] for x in self.data['data1']])/self.baseline[0] # x[2] is an array with all the values recorded for channel 1
-        d2 = np.array([x[2] for x in self.data['data2']])/self.baseline[1]
-        d3 = np.array([x[2] for x in self.data['data3']])/self.baseline[2]
-        d4 = np.array([x[2] for x in self.data['data4']])/self.baseline[3]
+        d1 = np.array([x[2] for x in self.data['data1']])/self.baseline[0]*self.baseunit # x[2] is an array with all the values recorded for channel 1
+        d2 = np.array([x[2] for x in self.data['data2']])/self.baseline[1]*self.baseunit
+        d3 = np.array([x[2] for x in self.data['data3']])/self.baseline[2]*self.baseunit
+        d4 = np.array([x[2] for x in self.data['data4']])/self.baseline[3]*self.baseunit
         d_avg1 = (np.array(d1) + np.array(d2)) / 2
         d_avg2 = (np.array(d3) + np.array(d4)) / 2
 
@@ -437,35 +439,17 @@ class MainWindow(QtWidgets.QMainWindow):
                            not self.data_select1.isChecked() and \
                            self.data_select3.isChecked())
 
-    def BaseValue(self):
-        d1 = np.array([x[2] for x in self.data['data1']])
-        d2 = np.array([x[2] for x in self.data['data2']])
-        d3 = np.array([x[2] for x in self.data['data3']])
-        d4 = np.array([x[2] for x in self.data['data4']])
-
-        len_d1 = len(d1)
-        len_d2 = len(d2)
-        len_d3 = len(d3)
-        len_d4 = len(d4)
-
-        print(np.average(d1[len_d1-10:len_d1]))
-        print(np.average(d2[len_d2 - 10:len_d2]))
-        print(np.average(d3[len_d3 - 10:len_d3]))
-        print(np.average(d4[len_d4 - 10:len_d4]))
-
-        self.baseline = [np.average(d1[len_d1-10:len_d1]), np.average(d2[len_d2 - 10:len_d2]), np.average(d3[len_d3 - 10:len_d3]), np.average(d4[len_d4 - 10:len_d4])]
-
-
+        
     def ConnectSensor(self):
         # Timer to data collect
         self.timer = QtCore.QTimer()  # Create QTimer instance
         self.timer.timeout.connect(self.UpdateData)  # Update data at constant time intervals
-        self.timer.timeout.connect(self.UpdateGraph)  # Update UI graph at constant time intervals
         
-        # Start communication with port
-        # Bug: When window closed directly with 'x' button and the port has not been closed before
-        # the port remains open and cannot be addressed
-        try:
+        # Use automatic port finder to determine the port of the device
+        self.port=self.SetPort()
+        print(self.port)
+        
+        try:            
             self.ard = serial.Serial(
                 port=self.port,
                 baudrate=500000,
@@ -485,6 +469,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.save_state = False
 
     def StartRecording(self):
+        self.timer.timeout.connect(self.UpdateGraph)
+        
         if self.go_state:
             self.time_start = time.time()
             self.time_start_true = time.time()  # Fix start time (i.e. so that difference with timer gives time passed)
@@ -596,12 +582,36 @@ class MainWindow(QtWidgets.QMainWindow):
         self.switch_setupwindow.emit(pass_val)
 
     # -------------------------------------------------------------------------------------------------------------------
-    # Arduino communication
+    # Under the hood
 
     def SetPort(self):
-        self.port = self.com_select.currentText()
-        print(self.port)
+        ports = list(serial.tools.list_ports.comports())
+        for com in ports:
+            reader_port=str(com[0])
+        return reader_port
 
+    def BaseValue(self):
+        d1 = np.array([x[2] for x in self.data['data1']])
+        d2 = np.array([x[2] for x in self.data['data2']])
+        d3 = np.array([x[2] for x in self.data['data3']])
+        d4 = np.array([x[2] for x in self.data['data4']])
+
+        len_d1 = len(d1)
+        len_d2 = len(d2)
+        len_d3 = len(d3)
+        len_d4 = len(d4)
+        
+        base_d = [np.average(d1[len_d1-5:len_d1]), np.average(d2[len_d2 - 5:len_d2]), np.average(d3[len_d3 - 5:len_d3]), np.average(d4[len_d4 - 5:len_d4])]
+        
+        for i in [0, 1, 2, 3]:
+            if base_d[i]>0:
+                self.baseline[i] = base_d[i]
+            else:
+                self.baseline[i] = 1
+                
+        print(base_d)
+        print(self.baseline)
+            
 
     # -------------------------------------------------------------------------------------------------------------------
     # Definition of PopUps
@@ -680,6 +690,7 @@ class MainWindow(QtWidgets.QMainWindow):
         returnValue = msgBox.exec()
 
         if returnValue == QMessageBox.Ok:
+            self.BaseValue()
             self.StartRecording() # Call StartRecording function when ok button pressed
             self.StepExperiment() # Trigger first step in experiment
         
