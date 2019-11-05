@@ -76,13 +76,16 @@ class Setup(QtWidgets.QMainWindow):
         pixmap = pixmap.scaledToWidth(100, 1)
         self.header_label.setPixmap(pixmap)
 
-
         self.lbl_description = QtWidgets.QLabel('Set up your protocol')
         self.lbl_description.setStyleSheet("font-weight:bold;font-size:25;text-size:25;")
 
         self.lbl_recipe = QtWidgets.QLabel('Protocol')
         self.lbl_recipe.setStyleSheet("font-weight:bold;")
 
+        self.lbl_step_name = QtWidgets.QLabel('Input step name')
+        self.lbl_step_name.setStyleSheet("font-weight:bold;")
+        self.lbl_step_time = QtWidgets.QLabel('Step time')
+        self.lbl_step_time.setStyleSheet("font-weight:bold;")
 
         # User text input
         self.txt_description = QtWidgets.QTextEdit('Add protocol description')
@@ -102,7 +105,7 @@ class Setup(QtWidgets.QMainWindow):
 
         # Add step
         self.btn_step_add = QtWidgets.QPushButton('Add')
-        self.btn_step_add.setFixedWidth(40)
+        # self.btn_step_add.setFixedWidth(40)
         self.btn_step_add.clicked.connect(self.add)
 
         # Reset
@@ -132,48 +135,46 @@ class Setup(QtWidgets.QMainWindow):
 
         # Description
         self.layout.addWidget(self.lbl_description, 2, 2, 1, 1)
-
-        self.layout.addWidget(self.txt_description, 4, 2, 1 ,4)
+        self.layout.addWidget(self.txt_description, 4, 2, 1, 4)
 
         # Protocol build
-
         self.layout.addWidget(self.lbl_recipe, 5, 2)
 
-        # self.layout.addWidget(self.lbl_step_name, 9, 2)
-        # self.layout.addWidget(self.lbl_step_time, 9, 3)
-        self.layout.addWidget(self.txt_step_name, 13, 2,1,2)
-        self.layout.addWidget(self.txt_step_time, 13, 4,1,2)
+        self.layout.addWidget(self.lbl_step_name, 13, 2, 1, 1)
+        self.layout.addWidget(self.txt_step_name, 14, 2, 1, 1)
 
-
+        self.layout.addWidget(self.lbl_step_time, 13, 3, 1, 2)
+        self.layout.addWidget(self.txt_step_time, 14, 3, 1, 2)
 
         # Buttons
         # self.layout.addWidget(self.btn_create_project, 1, 2)
         # self.layout.addWidget(self.btn_load_project, 1, 3)
-        self.layout.addWidget(self.btn_step_add, 13, 5,1,1, QtCore.Qt.AlignRight)
-        self.layout.addWidget(self.btn_reset_recipe, 16, 2,2,1)
+        # self.layout.addWidget(self.btn_step_add, 14, 5, 1, 1, QtCore.Qt.AlignRight)
+        self.layout.addWidget(self.btn_step_add, 14, 5, 1, 1, QtCore.Qt.AlignCenter)
+        self.layout.addWidget(self.btn_reset_recipe, 16, 2, 2, 1)
 
-        self.layout.addWidget(self.btn_save, 16, 2,2,4, QtCore.Qt.AlignCenter)
-        self.layout.addWidget(self.btn_start, 16, 5,2,1, QtCore.Qt.AlignRight)
+        self.layout.addWidget(self.btn_save, 16, 2, 2, 4, QtCore.Qt.AlignCenter)
+        self.layout.addWidget(self.btn_start, 16, 5, 2, 1, QtCore.Qt.AlignRight)
 
         self.show()
 
     def generate_recipe_table(self):
         # Create table
         self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-        self.recipeTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
-        self.recipeTable.setColumnCount(2)
         self.recipeTable.setRowCount(len(self.recipe['step_txt']))
+        self.recipeTable.setColumnCount(2)
 
-        self.recipeTable.setHorizontalHeaderLabels(['Step', 'Duration'])
+        # self.recipeTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.recipeTable.setHorizontalHeaderLabels(['Step Name', 'Duration'])
         # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
         header = self.recipeTable.horizontalHeader()
         header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        #header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
         for row in range(len(self.recipe['step_txt'])):
             self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
             self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
-            row+=1
+            row += 1
 
         self.recipeTable.setFixedHeight(400)
         self.recipeTable.resizeRowsToContents()
@@ -181,9 +182,6 @@ class Setup(QtWidgets.QMainWindow):
         self.layout.addWidget(self.recipeTable, 6, 2, 4, 4)
 
         self.show()
-
-        # table selection change
-        # self.tableWidget.doubleClicked.connect(self.on_click)
 
     def file_save(self):
         try:
