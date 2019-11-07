@@ -65,9 +65,9 @@ class LandingWindow(QtWidgets.QMainWindow):
         self.logo = QtWidgets.QLabel("HexagonFab")
         # To display the company logo on a Windows machine, full path must be used...
         # For Mac:
-        pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        # pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
         # For Windows:
-        # pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
+        pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
         pixmap = pixmap.scaledToWidth(250, 1)
         self.logo.setPixmap(pixmap)
 

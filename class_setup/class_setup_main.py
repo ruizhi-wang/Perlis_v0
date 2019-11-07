@@ -73,9 +73,9 @@ class Setup(QtWidgets.QMainWindow):
         self.header_label = QtGui.QLabel('HexagonFab')
         # To display the company logo on a Windows machine, full path must be used...
         # For Mac:
-        pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        # pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
         # For Windows:
-        # pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
+        pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
         pixmap = pixmap.scaledToWidth(100, 1)
         self.header_label.setPixmap(pixmap)
 

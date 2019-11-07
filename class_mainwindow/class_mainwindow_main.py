@@ -95,9 +95,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.header_label = QtGui.QLabel('HexagonFab')
         # To display the company logo on a Windows machine, full path must be used...
         # For Mac:
-        pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        # pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
         # For Windows:
-        # pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
+        pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
         pixmap = pixmap.scaledToWidth(100, 1)
         self.header_label.setPixmap(pixmap)
 
@@ -215,37 +215,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.l5 = self.plot.plot(pen=pg.mkPen('b', width=3, style=QtCore.Qt.DashLine))
         self.l6 = self.plot.plot(pen=pg.mkPen('w', width=3, style=QtCore.Qt.DashLine))
 
-        # --------------------------------------------
-    def generate_recipe_table(self):
-        # Create table
-        self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-        # setSizePolicy controls general sizing features for each column
-        # self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        self.recipeTable.setRowCount(len(self.recipe['step_txt']))
-        self.recipeTable.setColumnCount(2)
-        self.recipeTable.resizeRowsToContents()
-        # self.recipeTable.resizeColumnsToContents()
-
-        self.recipeTable.setHorizontalHeaderLabels(['Steps', 'Duration'])
-        # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
-        header = self.recipeTable.horizontalHeader()
-        header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        # header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setStretchLastSection(False)
-
-        for row in range(len(self.recipe['step_txt'])):
-            self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
-            self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
-            row += 1
-        try:
-            self.recipeTable.item(self.step_tracker-1, 0).setBackground(QtGui.QColor(180, 1, 1))
-            self.recipeTable.item(self.step_tracker-1, 1).setBackground(QtGui.QColor(180, 1, 1))
-        except:
-            pass
-
-        self.show()
-
     def display_widgets(self):
         # Header label
         self.layout.addWidget(self.header_label, 0, 0)
@@ -269,32 +238,31 @@ class MainWindow(QtWidgets.QMainWindow):
         # Main Window - Plot
         self.layout.addWidget(self.plot, 2, 2, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
 
-
         # Main Window - Control experiment
-        self.layout.addWidget(self.control_label, 3, 1)
+        self.layout.addWidget(self.control_label, 3, 2)
 
-        self.layout.addWidget(self.btn_stop, 4, 1)
-        self.layout.addWidget(self.btn_start, 4, 1, 1, 4, QtCore.Qt.AlignCenter)
-        self.layout.addWidget(self.btn_reset, 4, 4, QtCore.Qt.AlignRight)
-        self.layout.addWidget(self.btn_baseline, 4, 3, QtCore.Qt.AlignRight)
+        self.layout.addWidget(self.btn_stop, 4, 2)
+        self.layout.addWidget(self.btn_start, 4, 2, 1, 4, QtCore.Qt.AlignCenter)
+        self.layout.addWidget(self.btn_reset, 4, 5, QtCore.Qt.AlignRight)
+        self.layout.addWidget(self.btn_baseline, 4, 4, QtCore.Qt.AlignRight)
 
-        self.layout.addWidget(self.txt_note, 5, 1, 1, 3)
-        self.layout.addWidget(self.btn_note, 5, 4)
+        self.layout.addWidget(self.txt_note, 5, 2, 1, 3)
+        self.layout.addWidget(self.btn_note, 5, 5)
 
         # Main Window - Reader & Sensor connection
-        self.layout.addWidget(self.settings_label, 6, 1)
+        self.layout.addWidget(self.settings_label, 6, 2)
 
-        self.layout.addWidget(self.data_select1, 7, 1)
-        self.layout.addWidget(self.data_select2, 8, 1)
-        self.layout.addWidget(self.data_select3, 9, 1)
+        self.layout.addWidget(self.data_select1, 7, 2)
+        self.layout.addWidget(self.data_select2, 8, 2)
+        self.layout.addWidget(self.data_select3, 9, 2)
 
-        self.layout.addWidget(self.txt_points, 7, 2)
-        self.layout.addWidget(self.points_label, 7, 3, QtCore.Qt.AlignLeft)
+        self.layout.addWidget(self.txt_points, 7, 3)
+        self.layout.addWidget(self.points_label, 7, 4, QtCore.Qt.AlignLeft)
 
         #        self.layout.addWidget(self.com_select, 8, 2)
         #        self.layout.addWidget(self.com_label, 8, 3, QtCore.Qt.AlignLeft)
 
-        self.layout.addWidget(self.btn_connect, 7, 4, 3, 1)
+        self.layout.addWidget(self.btn_connect, 7, 5, 3, 1)
 
         # Style
         self.step_counter.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
@@ -315,6 +283,37 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.generate_current_table()
         self.generate_recipe_table()
         self.BtnDisable()
+
+        self.show()
+
+    # --------------------------------------------
+    def generate_recipe_table(self):
+        # Create table
+        self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        # setSizePolicy controls general sizing features for each column
+        # self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.recipeTable.setRowCount(len(self.recipe['step_txt']))
+        self.recipeTable.setColumnCount(2)
+        self.recipeTable.resizeRowsToContents()
+        # self.recipeTable.resizeColumnsToContents()
+
+        self.recipeTable.setHorizontalHeaderLabels(['Steps', 'Duration'])
+        # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
+        header = self.recipeTable.horizontalHeader()
+        header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        # header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setStretchLastSection(False)
+
+        for row in range(len(self.recipe['step_txt'])):
+            self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
+            self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
+            row += 1
+        try:
+            self.recipeTable.item(self.step_tracker - 1, 0).setBackground(QtGui.QColor(180, 1, 1))
+            self.recipeTable.item(self.step_tracker - 1, 1).setBackground(QtGui.QColor(180, 1, 1))
+        except:
+            pass
 
         self.show()
 
@@ -692,11 +691,13 @@ class MainWindow(QtWidgets.QMainWindow):
             if returnValue == QMessageBox.Ok:
                 self.sensor1_status = sensor1_status
                 self.sensor2_status = sensor2_status
-
                 self.lbl_sensor1_status.setText(self.sensor1_status)
-                self.lbl_sensor1_status.setStyleSheet('font-weight: bold; padding-top:8; background-color: green')
+                if sensor1_status == "Connected":
+                    self.lbl_sensor1_status.setStyleSheet('font-weight: bold; padding-top:8; color: green')
                 self.lbl_sensor2_status.setText(self.sensor2_status)
-                self.lbl_sensor2_status.setStyleSheet('font-weight: bold; padding-top:8; background-color: green')
+                if sensor2_status == "Connected":
+                    self.lbl_sensor2_status.setStyleSheet('font-weight: bold; padding-top:8; color: green')
+
                 if self.go_state:
                     self.BtnEnable()
 
