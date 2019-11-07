@@ -93,15 +93,25 @@ class MainWindow(QtWidgets.QMainWindow):
     def widgets(self):
         # HexagonFab Top Label
         self.header_label = QtGui.QLabel('HexagonFab')
+        # To display the company logo on a Windows machine, full path must be used...
+        # For Mac:
         pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        # For Windows:
+        # pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
         pixmap = pixmap.scaledToWidth(100, 1)
         self.header_label.setPixmap(pixmap)
 
-        self.sensor1_lbl = QtGui.QLabel("Sensor 1: " + self.sensor1_status)
+        self.sensor1_lbl = QtGui.QLabel("Sensor 1: ")
         self.sensor1_lbl.setStyleSheet('font-weight: bold; padding-top:8;')
 
-        self.sensor2_lbl = QtGui.QLabel("Sensor 2: " + self.sensor2_status)
+        self.lbl_sensor1_status = QtGui.QLabel(self.sensor1_status)
+        self.lbl_sensor1_status.setStyleSheet('font-weight: bold; padding-top:8; color: red')
+
+        self.sensor2_lbl = QtGui.QLabel("Sensor 2: ")
         self.sensor2_lbl.setStyleSheet('font-weight: bold; padding-top:8;')
+
+        self.lbl_sensor2_status = QtGui.QLabel(self.sensor2_status)
+        self.lbl_sensor2_status.setStyleSheet('font-weight: bold; padding-top:8; color: red')
 
         # Protocol plan
         self.lbl_recipe = QtGui.QLabel('Protocol')
@@ -240,8 +250,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # Header label
         self.layout.addWidget(self.header_label, 0, 0)
 
-        self.layout.addWidget(self.sensor1_lbl, 0, 3)
-        self.layout.addWidget(self.sensor2_lbl, 0, 5)
+        self.layout.addWidget(self.sensor1_lbl, 0, 2, QtCore.Qt.AlignRight)
+        self.layout.addWidget(self.lbl_sensor1_status, 0, 3, QtCore.Qt.AlignLeft)
+        self.layout.addWidget(self.sensor2_lbl, 0, 4, QtCore.Qt.AlignRight)
+        self.layout.addWidget(self.lbl_sensor2_status, 0, 5, QtCore.Qt.AlignLeft)
 
         # Sidebar - Protocol
 
@@ -306,37 +318,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.show()
 
-    def generate_recipe_table(self):
-        # Create table
-        self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-        # setSizePolicy controls general sizing features for each column
-        # self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        self.recipeTable.setRowCount(len(self.recipe['step_txt']))
-        self.recipeTable.setColumnCount(2)
-        self.recipeTable.resizeRowsToContents()
-        # self.recipeTable.resizeColumnsToContents()
-
-        self.recipeTable.setHorizontalHeaderLabels(['Steps', 'Duration'])
-        # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
-        header = self.recipeTable.horizontalHeader()
-        header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        # header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setStretchLastSection(False)
-
-        for row in range(len(self.recipe['step_txt'])):
-            self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
-            self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
-            row += 1
-
-        try:
-            self.recipeTable.item(self.step_tracker, 0).setBackground(QtGui.QColor(180, 1, 1))
-            self.recipeTable.item(self.step_tracker, 1).setBackground(QtGui.QColor(180, 1, 1))
-        except:
-            pass
-
-        self.show()
-
     def ConnectSensor(self):
         # Timer to data collect
         self.timer = QtCore.QTimer()  # Create QTimer instance
@@ -344,7 +325,22 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Use automatic port finder to determine the port of the device
         self.port = self.SetPort()
-        print(self.port)
+        if self.port == 'None':
+            print('Reader not available')
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Critical)
+            msg_box.setText('Please ensure that reader is connected')
+            msg_box.setWindowTitle("Missing reader connection")
+            msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+            return_value = msg_box.exec_()
+
+            if return_value == QMessageBox.Ok:
+                self.ConnectSensor()
+            else:
+                pass
+        else:
+            print(self.port)
 
         try:
             self.ard = serial.Serial(
@@ -364,6 +360,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.time_start_true = time.time()  # Fix start time (i.e. so that difference with timer gives time passed)
             self.timer.start(100)
             self.save_state = False
+
+    def SetPort(self):
+        reader_port = 'None'
+        ports = list(serial.tools.list_ports.comports())
+        for com in ports:
+            if 'Arduino' or 'Generic CDC' in com.description:
+                reader_port = com[0]
+        return reader_port
 
     def timer_countdown_counter(self):
         # Timer to keep track of time passed for each period
@@ -429,24 +433,24 @@ class MainWindow(QtWidgets.QMainWindow):
             msg = self.ard.readline()[0:-2].decode("utf-8")
             print(msg)
             msg = msg.split(',')
-            self.save_counter +=1
+            self.save_counter += 1
 
-            if float(msg[0]) > 10 and float(msg[0]) < 10000:
+            if 10 < float(msg[0]) < 10000:
                 self.data['data1'].append([time_true, time_sincestart, float(msg[0])]) # Definition of self.data
             else:
                 self.data['data1'].append([time_true, time_sincestart, 0])
 
-            if float(msg[1]) > 10 and float(msg[1]) < 10000:
+            if 10 < float(msg[1]) < 10000:
                 self.data['data2'].append([time_true, time_sincestart, float(msg[1])])
             else:
                 self.data['data2'].append([time_true, time_sincestart, 0])
 
-            if float(msg[2]) > 10 and float(msg[2]) < 10000:
+            if 10 < float(msg[2]) < 10000:
                 self.data['data3'].append([time_true, time_sincestart, float(msg[2])])
             else:
                 self.data['data3'].append([time_true, time_sincestart, 0])
 
-            if float(msg[3]) > 10 and float(msg[3]) < 10000:
+            if 10 < float(msg[3]) < 10000:
                 self.data['data4'].append([time_true, time_sincestart, float(msg[3])])
             else:
                 self.data['data4'].append([time_true, time_sincestart, 0])
@@ -462,11 +466,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 if self.save_counter > 20:
                     self.Save()
                     print('saved')
-                    self.save_counter=0
+                    self.save_counter = 0
 
     # Communicate with Arduino to receive data
     def UpdateGraph(self):
-        d1 = np.array([x[2] for x in self.data['data1']])/self.baseline[0]*self.baseunit # x[2] is an array with all the values recorded for channel 1
+        # x[2] is an array with all the values recorded for channel 1
+        d1 = np.array([x[2] for x in self.data['data1']])/self.baseline[0]*self.baseunit
         d2 = np.array([x[2] for x in self.data['data2']])/self.baseline[1]*self.baseunit
         d3 = np.array([x[2] for x in self.data['data3']])/self.baseline[2]*self.baseunit
         d4 = np.array([x[2] for x in self.data['data4']])/self.baseline[3]*self.baseunit
@@ -600,12 +605,12 @@ class MainWindow(QtWidgets.QMainWindow):
         ar[:,3] = [x[2] for x in self.data['data3']]
         ar[:,4] = [x[2] for x in self.data['data4']]
 
-        with open(msg+'_data.txt','w+') as f:
-            np.savetxt(f,ar,fmt=['%f','%f','%f','%f','%f'])
+        with open(msg+'_data.txt', 'w+') as f:
+            np.savetxt(f, ar, fmt=['%f', '%f', '%f', '%f', '%f'])
 
-        with open(msg+'_notes.txt','w+') as f:
+        with open(msg+'_notes.txt', 'w+') as f:
             for note in self.data['notes']:
-                f.write(str(note[1]) +' : '+ note[2]+'\n')
+                f.write(str(note[1]) + ' : ' + note[2] + '\n')
 
     def AddNote(self):
         msg = self.txt_note.text()
@@ -628,12 +633,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # -------------------------------------------------------------------------------------------------------------------
     # Under the hood
-
-    def SetPort(self):
-        ports = list(serial.tools.list_ports.comports())
-        for com in ports:
-            reader_port=str(com[0])
-        return reader_port
 
     def BaseValue(self):
         d1 = np.array([x[2] for x in self.data['data1']])
@@ -660,48 +659,52 @@ class MainWindow(QtWidgets.QMainWindow):
     # -------------------------------------------------------------------------------------------------------------------
     # Definition of PopUps
     def PopUpConnect(self):
-        if self.go_state:
-            self.ard.write(b'1')
-            msg = self.ard.readline()[0:-2].decode("utf-8")
-            msg = msg.split(',')
-            
-            sensor1_status = "Disconnected"
-            sensor2_status = "Disconnected"
-            
-            
-            if float(msg[0])>200 and float(msg[0])<5000 and float(msg[1])>200 and float(msg[1])<5000:
-                sensor1_status = "Connected"
-            if float(msg[2])>200 and float(msg[2])<5000 and float(msg[3])>200 and float(msg[3])<5000:
-                sensor2_status = "Connected"
-            
-            text_message = ("Sensor status: \n" 
-                                +"Sensor 1: " + sensor1_status + "\n"
-                                +"Sensor 2: " + sensor2_status + "\n"
-                                )
-        else:
-            msg = "incorrect com-port"
-            text_message = msg
+        sensor1_status = "Disconnected"
+        sensor2_status = "Disconnected"
 
-        msgBox = QMessageBox()
-        msgBox.setIcon(QMessageBox.Information)
-        msgBox.setText(text_message)
-        msgBox.setWindowTitle("QMessageBox Example")
-        msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-        # msgBox.buttonClicked.connect(msgButtonClick)
-        returnValue = msgBox.exec()
-
-        if returnValue == QMessageBox.Ok:
-            self.sensor1_status = sensor1_status
-            self.sensor2_status = sensor2_status
-            
-            self.sensor1_lbl.setText("Sensor 1: " + str(self.sensor1_status))
-            self.sensor2_lbl.setText("Sensor 2: " + str(self.sensor2_status))
+        try:
             if self.go_state:
-                self.BtnEnable()
-                
-        if returnValue == QMessageBox.Cancel:
-            self.Reset()
-            
+                self.ard.write(b'1')
+                msg = self.ard.readline()[0:-2].decode("utf-8")
+                msg = msg.split(',')
+
+                if 200 < float(msg[0]) < 5000 and 200 < float(msg[1]) < 5000:
+                    sensor1_status = "Connected"
+                if 200 < float(msg[2]) < 5000 and 200 < float(msg[3]) < 5000:
+                    sensor2_status = "Connected"
+
+                text_message = ("Sensor status: \n"
+                                    + "Sensor 1: " + sensor1_status + "\n"
+                                    + "Sensor 2: " + sensor2_status + "\n"
+                                    )
+            else:
+                msg = "Cannot detect sensors"
+                text_message = msg
+
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Information)
+            msgBox.setText(text_message)
+            msgBox.setWindowTitle("QMessageBox Example")
+            msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            # msgBox.buttonClicked.connect(msgButtonClick)
+            returnValue = msgBox.exec_()
+
+            if returnValue == QMessageBox.Ok:
+                self.sensor1_status = sensor1_status
+                self.sensor2_status = sensor2_status
+
+                self.lbl_sensor1_status.setText(self.sensor1_status)
+                self.lbl_sensor1_status.setStyleSheet('font-weight: bold; padding-top:8; background-color: green')
+                self.lbl_sensor2_status.setText(self.sensor2_status)
+                self.lbl_sensor2_status.setStyleSheet('font-weight: bold; padding-top:8; background-color: green')
+                if self.go_state:
+                    self.BtnEnable()
+
+            if returnValue == QMessageBox.Cancel:
+                self.Reset()
+        except ValueError:
+            print('Error reading sensor values')
+            pass
 
     def PopUpStep(self):
         try:
@@ -723,7 +726,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
 
-            returnValue = msgBox.exec()
+            returnValue = msgBox.exec_()
             if returnValue == QMessageBox.Ok:
 
                 # Save the current recipe step into the notes
@@ -752,7 +755,7 @@ class MainWindow(QtWidgets.QMainWindow):
         msgBox.setWindowTitle("QMessageBox Example")
         msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         # msgBox.buttonClicked.connect(msgButtonClick)
-        returnValue = msgBox.exec()
+        returnValue = msgBox.exec_()
 
     def PopUpStart(self):
         text_message = "Start Experiment (All previous data will be erased): \n\n " + str(self.recipe["step_txt"][0])
@@ -763,7 +766,7 @@ class MainWindow(QtWidgets.QMainWindow):
         msgBox.setWindowTitle("QMessageBox Example")
         msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         # msgBox.buttonClicked.connect(msgButtonClick)
-        returnValue = msgBox.exec()
+        returnValue = msgBox.exec_()
 
         if returnValue == QMessageBox.Ok:
             self.BaseValue()
@@ -800,7 +803,7 @@ class MainWindow(QtWidgets.QMainWindow):
         msgBox.setWindowTitle("QMessageBox Example")
         msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         # msgBox.buttonClicked.connect(msgButtonClick)
-        returnValue = msgBox.exec()
+        returnValue = msgBox.exec_()
         
         if returnValue == QMessageBox.Ok:
             self.Reset()
