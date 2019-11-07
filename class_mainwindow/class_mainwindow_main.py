@@ -153,6 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Label showing the experimental steps
         self.current_time_counter = QtWidgets.QLabel("Time remaining \n -")
+        self.current_time_counter.setStyleSheet('font-weight: bold')
         self.duration_counter = QtWidgets.QLabel("Time \n -")
         self.step_counter = QtWidgets.QLabel("Current step \n -")
         self.duration_next = QtWidgets.QLabel()
@@ -160,7 +161,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Buttons to navigate the experiments
         self.btn_experiment = QtWidgets.QPushButton("next step >")
-        self.btn_experiment.pressed.connect(self.StepExperiment) # Trigger next step in experimetn
+        self.btn_experiment.pressed.connect(self.PopUpStep) # Trigger PopUp the next step
         # Note text and connection
         self.txt_note = QtGui.QLineEdit('Write note...')  # Create instance of QLineEdit
         self.btn_note = QtGui.QPushButton('Add note')  # Create instance of QPushButton
@@ -208,12 +209,44 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Plot widgets and lines
         self.plot = pg.PlotWidget()
-        self.l1 = self.plot.plot(pen=pg.mkPen('r', width=3))
-        self.l2 = self.plot.plot(pen=pg.mkPen('b', width=3))
+#        self.plot.addLegend()
+        self.l1 = self.plot.plot(pen=pg.mkPen('r', width=3), name="Sensor 1 - Ch1")
+        self.l2 = self.plot.plot(pen=pg.mkPen('b', width=3), name="Sensor 1 - Ch2")
         self.l3 = self.plot.plot(pen=pg.mkPen('w', width=3))
-        self.l4 = self.plot.plot(pen=pg.mkPen('r', width=3, style=QtCore.Qt.DashLine))
-        self.l5 = self.plot.plot(pen=pg.mkPen('b', width=3, style=QtCore.Qt.DashLine))
+        self.l4 = self.plot.plot(pen=pg.mkPen('r', width=3, style=QtCore.Qt.DashLine), name="Sensor 2 - Ch1")
+        self.l5 = self.plot.plot(pen=pg.mkPen('b', width=3, style=QtCore.Qt.DashLine), name="Sensor 2 - Ch2")
         self.l6 = self.plot.plot(pen=pg.mkPen('w', width=3, style=QtCore.Qt.DashLine))
+
+        # --------------------------------------------
+    def generate_recipe_table(self):
+        # Create table
+        self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        # setSizePolicy controls general sizing features for each column
+        # self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.recipeTable.setRowCount(len(self.recipe['step_txt']))
+        self.recipeTable.setColumnCount(2)
+        self.recipeTable.resizeRowsToContents()
+        # self.recipeTable.resizeColumnsToContents()
+
+        self.recipeTable.setHorizontalHeaderLabels(['Steps', 'Duration'])
+        # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
+        header = self.recipeTable.horizontalHeader()
+        header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        # header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setStretchLastSection(False)
+
+        for row in range(len(self.recipe['step_txt'])):
+            self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
+            self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
+            row += 1
+        try:
+            self.recipeTable.item(self.step_tracker-1, 0).setBackground(QtGui.QColor(180, 1, 1))
+            self.recipeTable.item(self.step_tracker-1, 1).setBackground(QtGui.QColor(180, 1, 1))
+        except:
+            pass
+
+        self.show()
 
     def display_widgets(self):
         # Header label
@@ -237,6 +270,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Main Window - Plot
         self.layout.addWidget(self.plot, 2, 2, 1, 4)  # Add plot (int row, int column, int rowSpan, int columnSpan)
+
 
         # Main Window - Control experiment
         self.layout.addWidget(self.control_label, 3, 2)
@@ -283,37 +317,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.generate_current_table()
         self.generate_recipe_table()
         self.BtnDisable()
-
-        self.show()
-
-    # --------------------------------------------
-    def generate_recipe_table(self):
-        # Create table
-        self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-        # setSizePolicy controls general sizing features for each column
-        # self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        self.recipeTable.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        self.recipeTable.setRowCount(len(self.recipe['step_txt']))
-        self.recipeTable.setColumnCount(2)
-        self.recipeTable.resizeRowsToContents()
-        # self.recipeTable.resizeColumnsToContents()
-
-        self.recipeTable.setHorizontalHeaderLabels(['Steps', 'Duration'])
-        # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
-        header = self.recipeTable.horizontalHeader()
-        header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        # header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setStretchLastSection(False)
-
-        for row in range(len(self.recipe['step_txt'])):
-            self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
-            self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
-            row += 1
-        try:
-            self.recipeTable.item(self.step_tracker - 1, 0).setBackground(QtGui.QColor(180, 1, 1))
-            self.recipeTable.item(self.step_tracker - 1, 1).setBackground(QtGui.QColor(180, 1, 1))
-        except:
-            pass
 
         self.show()
 
@@ -622,6 +625,8 @@ class MainWindow(QtWidgets.QMainWindow):
             time_sincestart = 0
 
         self.data['notes'].append([time_true, time_sincestart, msg])
+        
+        self.txt_note.setText("Write note ...")
 
     def switch_landing(self):
         self.switch_landingwindow.emit()
@@ -691,9 +696,11 @@ class MainWindow(QtWidgets.QMainWindow):
             if returnValue == QMessageBox.Ok:
                 self.sensor1_status = sensor1_status
                 self.sensor2_status = sensor2_status
+
                 self.lbl_sensor1_status.setText(self.sensor1_status)
                 if sensor1_status == "Connected":
                     self.lbl_sensor1_status.setStyleSheet('font-weight: bold; padding-top:8; color: green')
+
                 self.lbl_sensor2_status.setText(self.sensor2_status)
                 if sensor2_status == "Connected":
                     self.lbl_sensor2_status.setStyleSheet('font-weight: bold; padding-top:8; color: green')
@@ -725,7 +732,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if current_step == len(self.recipe["step_time"]):
                 msgBox.setText("Done with the experiment!")
 
-            msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            msgBox.setStandardButtons(QMessageBox.Ok)
 
             returnValue = msgBox.exec_()
             if returnValue == QMessageBox.Ok:
