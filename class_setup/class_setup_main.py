@@ -71,19 +71,25 @@ class Setup(QtWidgets.QMainWindow):
     def widgets(self):
         # HexagonFab Top Label
         self.header_label = QtGui.QLabel('HexagonFab')
-        pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        # To display the company logo on a Windows machine, full path must be used...
+        # For Mac:
+        # pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        # For Windows:
+        pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
         pixmap = pixmap.scaledToWidth(100, 1)
         self.header_label.setPixmap(pixmap)
 
         self.lbl_description = QtWidgets.QLabel('Set up your protocol')
-        self.lbl_description.setStyleSheet("font-weight:bold;font-size:25;text-size:25;")
+        # Python has trouble recognizing "text-size" as a valid property
+        # self.lbl_description.setStyleSheet("font-weight:bold;font-size:25;text-size:25;")
+        self.lbl_description.setStyleSheet("font-weight:bold;font-size:25;")
 
         self.lbl_recipe = QtWidgets.QLabel('Protocol')
         self.lbl_recipe.setStyleSheet("font-weight:bold;")
 
         self.lbl_step_name = QtWidgets.QLabel('Input step name')
         self.lbl_step_name.setStyleSheet("font-weight:bold;")
-        self.lbl_step_time = QtWidgets.QLabel('Step time')
+        self.lbl_step_time = QtWidgets.QLabel('Step duration')
         self.lbl_step_time.setStyleSheet("font-weight:bold;")
 
         # User text input
