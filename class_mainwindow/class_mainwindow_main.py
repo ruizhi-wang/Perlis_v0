@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout, \
+    QMessageBox, QProgressDialog
 from PyQt5.QtGui import QPixmap
 import pyqtgraph as pg
 import numpy as np
@@ -36,7 +37,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Load values in form arguments
         self.recipe = pass_value[0]
         self.path = pass_value[1]
-        
+
         # Set go_state to False to prevent data being written
         self.go_state = False  # Create class variables (i.e. go_state) and set it to
 
@@ -46,7 +47,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Set initial baseline value
         self.baseunit = 100
         self.baseline = [1, 1, 1, 1]
-        
+
         # Setting up the data sets for saving and displaying
         self.data = {
             'data1': [],
@@ -57,7 +58,6 @@ class MainWindow(QtWidgets.QMainWindow):
         }
 
         self.display_no = 500  # Initial amount of data points displayed
-
 
         # Populate tool bar
         self.toolBar = self.addToolBar('Create')
@@ -78,12 +78,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sensor2_status = 'Disconnected'
 
         # Main UI
+        self.layout = QtWidgets.QGridLayout()
         self.main_window()
 
     def main_window(self):
         # Initialize
         self.setCentralWidget(QtWidgets.QWidget(self))
-        self.layout = QtWidgets.QGridLayout()
         self.centralWidget().setLayout(self.layout)
 
         # Populate widgets
@@ -125,7 +125,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings_label = QtGui.QLabel('Reader & sensor connection')
         self.settings_label.setStyleSheet('font-weight: bold; padding-top:8;')
 
-
         # Start connection & showing the graph
         self.btn_connect = QtGui.QPushButton('Connect \n sensor')  # Create instance of QPushButton
         self.btn_connect.setStyleSheet("height: 50")
@@ -160,7 +159,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Buttons to navigate the experiments
         self.btn_experiment = QtWidgets.QPushButton("next step >")
-        self.btn_experiment.pressed.connect(self.StepExperiment) # Trigger next step in experimetn
+        self.btn_experiment.pressed.connect(self.StepExperiment)  # Trigger next step in experimetn
         # Note text and connection
         self.txt_note = QtGui.QLineEdit('Write note...')  # Create instance of QLineEdit
         self.btn_note = QtGui.QPushButton('Add note')  # Create instance of QPushButton
@@ -208,11 +207,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Plot widgets and lines
         self.plot = pg.PlotWidget()
-        self.l1 = self.plot.plot(pen=pg.mkPen('r', width=3))
-        self.l2 = self.plot.plot(pen=pg.mkPen('b', width=3))
+        # self.plot.addLegend()
+        self.l1 = self.plot.plot(pen=pg.mkPen('r', width=3), name="Sen1Ch1")
+        self.l2 = self.plot.plot(pen=pg.mkPen('b', width=3), name="Sen1Ch2")
         self.l3 = self.plot.plot(pen=pg.mkPen('w', width=3))
-        self.l4 = self.plot.plot(pen=pg.mkPen('r', width=3, style=QtCore.Qt.DashLine))
-        self.l5 = self.plot.plot(pen=pg.mkPen('b', width=3, style=QtCore.Qt.DashLine))
+        self.l4 = self.plot.plot(pen=pg.mkPen('r', width=3, style=QtCore.Qt.DashLine), name="Sen2Ch1")
+        self.l5 = self.plot.plot(pen=pg.mkPen('b', width=3, style=QtCore.Qt.DashLine), name="Sen2Ch1")
         self.l6 = self.plot.plot(pen=pg.mkPen('w', width=3, style=QtCore.Qt.DashLine))
 
     def display_widgets(self):
@@ -377,7 +377,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def timer_step_counter(self):
         self.timer_step = QtCore.QTimer()
-        step_time= int(self.recipe["step_time"][self.step_tracker]) * 1000
+        step_time = int(self.recipe["step_time"][self.step_tracker]) * 1000
         self.timer_step.setInterval(step_time)
         self.timer_step.timeout.connect(self.PopUpStep)
         self.timer_step.start()
@@ -435,7 +435,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.save_counter += 1
 
             if 10 < float(msg[0]) < 10000:
-                self.data['data1'].append([time_true, time_sincestart, float(msg[0])]) # Definition of self.data
+                self.data['data1'].append([time_true, time_sincestart, float(msg[0])])  # Definition of self.data
             else:
                 self.data['data1'].append([time_true, time_sincestart, 0])
 
@@ -470,10 +470,10 @@ class MainWindow(QtWidgets.QMainWindow):
     # Communicate with Arduino to receive data
     def UpdateGraph(self):
         # x[2] is an array with all the values recorded for channel 1
-        d1 = np.array([x[2] for x in self.data['data1']])/self.baseline[0]*self.baseunit
-        d2 = np.array([x[2] for x in self.data['data2']])/self.baseline[1]*self.baseunit
-        d3 = np.array([x[2] for x in self.data['data3']])/self.baseline[2]*self.baseunit
-        d4 = np.array([x[2] for x in self.data['data4']])/self.baseline[3]*self.baseunit
+        d1 = np.array([x[2] for x in self.data['data1']]) / self.baseline[0] * self.baseunit
+        d2 = np.array([x[2] for x in self.data['data2']]) / self.baseline[1] * self.baseunit
+        d3 = np.array([x[2] for x in self.data['data3']]) / self.baseline[2] * self.baseunit
+        d4 = np.array([x[2] for x in self.data['data4']]) / self.baseline[3] * self.baseunit
         d_avg1 = (np.array(d1) + np.array(d2)) / 2
         d_avg2 = (np.array(d3) + np.array(d4)) / 2
 
@@ -519,13 +519,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def StartRecording(self):
         self.timer.timeout.connect(self.UpdateGraph)
-        
+
         if self.go_state:
             self.time_start = time.time()
             self.time_start_true = time.time()  # Fix start time (i.e. so that difference with timer gives time passed)
             self.timer.start(100)
             self.save_state = True
-            
+
     def StopRecording(self):
         self.timer.stop()
         self.ard.close()
@@ -587,27 +587,27 @@ class MainWindow(QtWidgets.QMainWindow):
         self.step_counter.setText("")
         self.duration_next.setText("")
         self.step_next.setText("")
-        
-        self.baseline = [1, 1, 1, 1] 
+
+        self.baseline = [1, 1, 1, 1]
 
         # Disable all buttons except connect
         self.BtnDisable()
 
         print("reset performed")
-    
+
     def Save(self):
         msg = self.path
-        ar = np.zeros([len(self.data['data1']),5])
-        ar[:,0] = [x[0] for x in self.data['data1']]
-        ar[:,1] = [x[2] for x in self.data['data1']]
-        ar[:,2] = [x[2] for x in self.data['data2']]
-        ar[:,3] = [x[2] for x in self.data['data3']]
-        ar[:,4] = [x[2] for x in self.data['data4']]
+        ar = np.zeros([len(self.data['data1']), 5])
+        ar[:, 0] = [x[0] for x in self.data['data1']]
+        ar[:, 1] = [x[2] for x in self.data['data1']]
+        ar[:, 2] = [x[2] for x in self.data['data2']]
+        ar[:, 3] = [x[2] for x in self.data['data3']]
+        ar[:, 4] = [x[2] for x in self.data['data4']]
 
-        with open(msg+'_data.txt', 'w+') as f:
+        with open(msg + '_data.txt', 'w+') as f:
             np.savetxt(f, ar, fmt=['%f', '%f', '%f', '%f', '%f'])
 
-        with open(msg+'_notes.txt', 'w+') as f:
+        with open(msg + '_notes.txt', 'w+') as f:
             for note in self.data['notes']:
                 f.write(str(note[1]) + ' : ' + note[2] + '\n')
 
@@ -622,6 +622,13 @@ class MainWindow(QtWidgets.QMainWindow):
             time_sincestart = 0
 
         self.data['notes'].append([time_true, time_sincestart, msg])
+
+        # msg_box = QMessageBox()
+        # msg_box.setIcon(QMessageBox.Information)
+        # msg_box.setText("Note saved to file!")
+        # msg_box.setWindowTitle("Note save status")
+        # msg_box.setStandardButtons(QMessageBox.Ok)
+        # msg_box.exec_()
 
     def switch_landing(self):
         self.switch_landingwindow.emit()
@@ -643,15 +650,16 @@ class MainWindow(QtWidgets.QMainWindow):
         len_d2 = len(d2)
         len_d3 = len(d3)
         len_d4 = len(d4)
-        
-        base_d = [np.average(d1[len_d1-5:len_d1]), np.average(d2[len_d2 - 5:len_d2]), np.average(d3[len_d3 - 5:len_d3]), np.average(d4[len_d4 - 5:len_d4])]
-        
+
+        base_d = [np.average(d1[len_d1 - 5:len_d1]), np.average(d2[len_d2 - 5:len_d2]),
+                  np.average(d3[len_d3 - 5:len_d3]), np.average(d4[len_d4 - 5:len_d4])]
+
         for i in [0, 1, 2, 3]:
-            if base_d[i]>0:
+            if base_d[i] > 0:
                 self.baseline[i] = base_d[i]
             else:
                 self.baseline[i] = 1
-                
+
         print(base_d)
         print(self.baseline)
 
@@ -673,9 +681,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     sensor2_status = "Connected"
 
                 text_message = ("Sensor status: \n"
-                                    + "Sensor 1: " + sensor1_status + "\n"
-                                    + "Sensor 2: " + sensor2_status + "\n"
-                                    )
+                                + "Sensor 1: " + sensor1_status + "\n"
+                                + "Sensor 2: " + sensor2_status + "\n"
+                                )
             else:
                 msg = "Cannot detect sensors"
                 text_message = msg
@@ -771,7 +779,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if returnValue == QMessageBox.Ok:
             self.BaseValue()
-            
+
             # Reset data storage
             self.data = {
                 'data1': [],
@@ -780,10 +788,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 'data4': [],
                 'notes': [],
             }
-            
-            self.StartRecording() # Call StartRecording function when ok button pressed
-            self.StepExperiment() # Trigger first step in experiment
-            
+
+            self.StartRecording()  # Call StartRecording function when ok button pressed
+            self.StepExperiment()  # Trigger first step in experiment
+
             # Save the current recipe step into the notes
             recipe_step = str(self.recipe["step_txt"][0])
             try:
@@ -794,7 +802,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 time_sincestart = 0
 
             self.data['notes'].append([time_true, time_sincestart, recipe_step])
-        
+
     def PopUpReset(self):
         text_message = "All data will be erased"
 
@@ -805,13 +813,13 @@ class MainWindow(QtWidgets.QMainWindow):
         msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         # msgBox.buttonClicked.connect(msgButtonClick)
         returnValue = msgBox.exec_()
-        
+
         if returnValue == QMessageBox.Ok:
             self.Reset()
 
     def PopUpHome(self):
         choice = QtWidgets.QMessageBox.question(self, 'Return', 'Are you sure you wish to return to Home?',
-                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+                                                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
             self.switch_landing()
         else:
@@ -819,7 +827,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def PopUpSetup(self):
         choice = QtWidgets.QMessageBox.question(self, 'Return', 'Are you sure you wish to return to Protocol Setup?',
-                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+                                                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
             self.switch_setup()
         else:
@@ -827,16 +835,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def PopUpClose(self):
         choice = QtWidgets.QMessageBox.question(self, 'Close', 'Are you sure you wish to exit?',
-                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+                                                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
             self.Reset()
             sys.exit()
         else:
             pass
 
-
         # __________________________________________________________________________
-            
+
     def BtnEnable(self):
         self.btn_start.setEnabled(True)
         self.btn_stop.setEnabled(True)
