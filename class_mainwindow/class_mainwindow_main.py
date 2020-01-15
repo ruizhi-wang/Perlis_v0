@@ -211,9 +211,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.plot = pg.PlotWidget()
 #       self.plot.addLegend()
         self.l1 = self.plot.plot(pen=pg.mkPen('r', width=3), name="Sensor 1 - Ch1")
-        self.l2 = self.plot.plot(pen=pg.mkPen('b', width=3), name="Sensor 1 - Ch2")
+        self.l2 = self.plot.plot(pen=pg.mkPen('r', width=3, style=QtCore.Qt.DashLine), name="Sensor 1 - Ch2")
         self.l3 = self.plot.plot(pen=pg.mkPen('w', width=3))
-        self.l4 = self.plot.plot(pen=pg.mkPen('r', width=3, style=QtCore.Qt.DashLine), name="Sensor 2 - Ch1")
+        self.l4 = self.plot.plot(pen=pg.mkPen('b', width=3), name="Sensor 2 - Ch1")
         self.l5 = self.plot.plot(pen=pg.mkPen('b', width=3, style=QtCore.Qt.DashLine), name="Sensor 2 - Ch2")
         self.l6 = self.plot.plot(pen=pg.mkPen('w', width=3, style=QtCore.Qt.DashLine))
 
