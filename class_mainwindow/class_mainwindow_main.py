@@ -97,7 +97,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # For Mac:
         # pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
         # For Windows:
-        pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
+        pixmap = QPixmap('C:/Users/Lukas/Documents/Python/Perlis_v0/class_landing/hexagonfab_logo_250.png')
         pixmap = pixmap.scaledToWidth(100, 1)
         self.header_label.setPixmap(pixmap)
 

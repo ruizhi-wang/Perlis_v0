@@ -12,13 +12,17 @@ from class_testwindow import class_testwindow_main
 import qtmodern.styles
 import qtmodern.windows
 
-# Passvalue is a list: [0] is a dict with the recipe; [1] is a str with the path
 
+# Passvalue is a list: [0] is a dict with the recipe; [1] is a str with the path
 # Define controller to act
 class Controller(QtWidgets.QMainWindow):
-
+    '''
+    Controller switches between program windows.
+    '''
     def __init__(self):
         super(Controller, self).__init__()
+        # Initialize landing window
+        self.landing = class_landing_main.landing_window()
         pass
 
     def show_landing(self):
@@ -36,8 +40,6 @@ class Controller(QtWidgets.QMainWindow):
             self.setup.close()
         except:
             pass
-        # Call first landing window
-        self.landing = class_landing_main.LandingWindow()
         # Code to call main window
         self.landing.switch_setupwindow.connect(self.show_setup)
         self.landing.switch_testwindow.connect(self.show_test)
@@ -59,7 +61,7 @@ class Controller(QtWidgets.QMainWindow):
         except:
             pass
         # Call first setup window
-        self.setup = class_setup_main.Setup(pass_value)
+        self.setup = class_setup_main.setup(pass_value)
         # Code to call main window
         self.setup.switch_landingwindow.connect(self.show_landing)
         self.setup.switch_mainwindow.connect(self.show_main)
@@ -79,7 +81,6 @@ class Controller(QtWidgets.QMainWindow):
         self.test_window.show()
 
 
-
 # Run code
 def main():
     app = QtWidgets.QApplication(sys.argv)
@@ -90,6 +91,7 @@ def main():
     # mw.show()
 
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()

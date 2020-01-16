@@ -1,21 +1,23 @@
 import os
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog, \
+    QMessageBox
 from PyQt5.QtGui import QIcon, QPixmap
 
-class LandingWindow(QtWidgets.QMainWindow):
+
+class landing_window(QtWidgets.QMainWindow):
     """
-    Class that defines setup window in reader UI.
+    Class that defines landing window, the first window to appear at program start.
     """
     # Define switch window as a type of pyqtSignal, i.e., once activated the window will be switched
     switch_setupwindow = QtCore.pyqtSignal(list)
     switch_testwindow = QtCore.pyqtSignal()
 
-
     def __init__(self):
-        super(LandingWindow, self).__init__()
+        super(landing_window, self).__init__()
 
+        # Create empty file path
         self.path = ''
         self.recipe = {'step_txt': [], 'step_time': []}
 
@@ -39,18 +41,20 @@ class LandingWindow(QtWidgets.QMainWindow):
         self.closeWindow.triggered.connect(self.close_app)
         self.toolBar.addAction(self.closeWindow)
 
-        # Create empty file path
-        # self.path = 'path_file'
-        self.path = ''
+        # Initialize layout for widgets
+        self.layout = QtWidgets.QGridLayout()
+
+        # HexagonFab logo
+        self.logo = QtWidgets.QLabel("HexagonFab")
+
+        # Widget initialization
+        self.btn_create_project = QtWidgets.QPushButton('Set up experiment')
+        self.btn_test = QtWidgets.QPushButton('Express experiment')
 
         # Execute main window
         self.main_window()
 
     def main_window(self):
-        # Initialize layout for widgets
-        self.layout = QtWidgets.QGridLayout()
-        self.recipeTable = QTableWidget()
-
         # Create layout
         self.setCentralWidget(QtWidgets.QWidget(self))
         self.centralWidget().setLayout(self.layout)
@@ -60,36 +64,27 @@ class LandingWindow(QtWidgets.QMainWindow):
         self.display_widgets()
 
     def widgets(self):
-
-        # Show HexagonFab logo
-        self.logo = QtWidgets.QLabel("HexagonFab")
         # To display the company logo on a Windows machine, full path must be used...
         # For Mac:
-        # pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        # pix_map = QPixmap('./class_landing/hexagonfab_logo_250.png')
         # For Windows:
-        pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
-        pixmap = pixmap.scaledToWidth(250, 1)
-        self.logo.setPixmap(pixmap)
+        pix_map = QPixmap('C:/Users/Lukas/Documents/Python/Perlis_v0/class_landing/hexagonfab_logo_250.png')
+        pix_map = pix_map.scaledToWidth(250, 1)
+        self.logo.setPixmap(pix_map)
 
         # Create new recipe file
-        self.btn_create_project = QtWidgets.QPushButton('Set up experiment')
-        self.btn_create_project.setStyleSheet("background-color: #4933FF; \
-                                              color: white; \
-                                              height: 25; \
-                                              ")
+        self.btn_create_project.setStyleSheet('background-color: #4933FF; color: white; height: 25')
         self.btn_create_project.setFixedWidth(170)
-        self.btn_create_project.clicked.connect(self.PopUpNew)
+        self.btn_create_project.clicked.connect(self.path_create)
 
         # Freestyle experiment
-        self.btn_test = QtWidgets.QPushButton('Express Experiment')
         self.btn_test.setFlat(True)
-        self.btn_test.setStyleSheet("height: 25;margin-bottom:200;margin-top:2;")
-        self.btn_test.clicked.connect(self.SwitchTest)
+        self.btn_test.setStyleSheet('height: 25; margin-bottom:200; margin-top:2')
+        self.btn_test.clicked.connect(self.switch_test)
 
     def display_widgets(self):
-
         # Logo
-        self.layout.addWidget(self.logo, 1,1,QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(self.logo, 1, 1, QtCore.Qt.AlignHCenter)
 
         # Buttons
         self.layout.addWidget(self.btn_create_project, 2, 1, QtCore.Qt.AlignHCenter)
@@ -97,19 +92,20 @@ class LandingWindow(QtWidgets.QMainWindow):
 
         self.show()
 
-
-
-    def PathCreate(self):
-        description = "Empty"
-
+    def path_create(self):
         file_path = QFileDialog.getSaveFileName(self, 'Please provide path for experiment', os.getenv('HOME'))[0]
+        print(file_path)
 
         if file_path == '':
             return
 
         self.path = file_path
+        if self.path != '':
+            self.switch_setup()
+        else:
+            pass
 
-    def LoadRecipe(self):
+    def load_recipe(self):
         try:
             file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getenv('HOME'))[0]
             file = open(file_path, 'r+')  # Open with the intention to read
@@ -126,47 +122,50 @@ class LandingWindow(QtWidgets.QMainWindow):
                     self.recipe['step_time'].append(content[1].rstrip())
 
             self.path = file_path
+            if self.path != '':
+                self.switch_setup()
+            else:
+                pass
         except:
             print('Load file error')
 
     def close_app(self):
         choice = QtWidgets.QMessageBox.question(self, 'Close', 'Are you sure you wish to exit?',
-                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+                                                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
             sys.exit()
         else:
             pass
 
-    def SwitchSetup(self):
-        pass_val=[self.recipe, self.path]
-        self.switch_setupwindow.emit(pass_val)
+    def switch_setup(self):
+        pass_value = [self.recipe, self.path]
+        self.switch_setupwindow.emit(pass_value)
 
-    def SwitchTest(self):
+    def switch_test(self):
         self.switch_testwindow.emit()
 
     #-------------------------------------------------------------------------------------------------------------------
-    def PopUpNew(self):
-        text_message = "Create new or load existing protocol?"
+    def popup_new(self):
+        text_message = "Create new or load existing project folder?"
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
         msgBox.setText(text_message)
         msgBox.addButton("Create", QMessageBox.ActionRole)
         msgBox.addButton("Load", QMessageBox.AcceptRole)
-        returnValue = msgBox.exec()
+        return_value = msgBox.exec()
 
-
-        if returnValue == 1:
+        if return_value == 1:
             print("1")
-            self.LoadRecipe()
+            self.load_recipe()
             if self.path != '':
-                self.SwitchSetup()
+                self.switch_setup()
             else:
                 pass
 
-        if returnValue == 0:
+        if return_value == 0:
             print("0")
-            self.PathCreate()
+            self.path_create()
             if self.path != '':
-                self.SwitchSetup()
+                self.switch_setup()
             else:
                 pass

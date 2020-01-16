@@ -2,10 +2,11 @@ import os
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog, QHeaderView, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget, QTableWidgetItem, QFileDialog, \
+    QHeaderView, QMessageBox
 
 
-class Setup(QtWidgets.QMainWindow):
+class setup(QtWidgets.QMainWindow):
     """
     Class that defines setup window in reader UI.
     """
@@ -14,7 +15,7 @@ class Setup(QtWidgets.QMainWindow):
     switch_landingwindow = QtCore.pyqtSignal()
 
     def __init__(self, pass_val):
-        super(Setup, self).__init__()
+        super(setup, self).__init__()
 
         # Load the recipe passed on from landing page
         self.recipe = pass_val[0]
@@ -46,15 +47,34 @@ class Setup(QtWidgets.QMainWindow):
         self.closeWindow.triggered.connect(self.close_app)
         self.toolBar.addAction(self.closeWindow)
 
+        # Initialize widgets
+        self.layout = QtWidgets.QGridLayout()
+        # self.layout.setRowStretch(6, 10)
+        self.recipe_table = QTableWidget()
+        self.header_label = QtGui.QLabel('HexagonFab')
+
+        self.lbl_load = QtWidgets.QLabel('Load steps from existing recipe')
+        self.lbl_description = QtWidgets.QLabel('Set up your protocol')
+        self.lbl_recipe = QtWidgets.QLabel('Protocol')
+        self.lbl_step_name = QtWidgets.QLabel('Input step name')
+        self.lbl_step_time = QtWidgets.QLabel('Step duration')
+
+        self.protocol_description = 'Add protocol description...'
+
+        self.txt_description = QtWidgets.QTextEdit(self.protocol_description)
+        self.txt_step_name = QtWidgets.QLineEdit('Add step name...')
+        self.txt_step_time = QtWidgets.QLineEdit("0")
+
+        self.btn_load = QtWidgets.QPushButton('Load')
+        self.btn_step_add = QtWidgets.QPushButton('Add')
+        self.btn_reset_recipe = QtWidgets.QPushButton('Reset')
+        self.btn_save = QtWidgets.QPushButton('Save')
+        self.btn_start = QtWidgets.QPushButton("Continue >")
+
         # Execute main window
         self.main_window()
 
     def main_window(self):
-        # Initialize layout for widgets
-        self.layout = QtWidgets.QGridLayout()
-        # self.layout.setRowStretch(6, 10)
-
-        self.recipeTable = QTableWidget()
         # Generate table with recipe
         self.generate_recipe_table()
 
@@ -67,39 +87,24 @@ class Setup(QtWidgets.QMainWindow):
         self.widgets()
         self.display_widgets()
 
-    # Initialize widgets
     def widgets(self):
-        # HexagonFab Top Label
-        self.header_label = QtGui.QLabel('HexagonFab')
         # To display the company logo on a Windows machine, full path must be used...
         # For Mac:
-        # pixmap = QPixmap('./class_landing/hexagonfab_logo_250.png')
+        # pix_map = QPixmap('./class_landing/hexagonfab_logo_250.png')
         # For Windows:
-        pixmap = QPixmap('D:Perlis_v0\class_landing\hexagonfab_logo_250.png')
-        pixmap = pixmap.scaledToWidth(100, 1)
-        self.header_label.setPixmap(pixmap)
+        pix_map = QPixmap('C:/Users/Lukas/Documents/Python/Perlis_v0/class_landing/hexagonfab_logo_250.png')
+        pix_map = pix_map.scaledToWidth(100, 1)
+        self.header_label.setPixmap(pix_map)
 
-        self.lbl_description = QtWidgets.QLabel('Set up your protocol')
-        # Python has trouble recognizing "text-size" as a valid property
-        # self.lbl_description.setStyleSheet("font-weight:bold;font-size:25;text-size:25;")
-        self.lbl_description.setStyleSheet("font-weight:bold;font-size:25;")
+        self.lbl_load.setStyleSheet("font-weight:bold; font-size:25")
+        self.lbl_description.setStyleSheet("font-weight:bold; font-size:25")
 
-        self.lbl_recipe = QtWidgets.QLabel('Protocol')
-        self.lbl_recipe.setStyleSheet("font-weight:bold;")
+        self.lbl_recipe.setStyleSheet("font-weight:bold")
+        self.lbl_step_name.setStyleSheet("font-weight:bold")
+        self.lbl_step_time.setStyleSheet("font-weight:bold")
 
-        self.lbl_step_name = QtWidgets.QLabel('Input step name')
-        self.lbl_step_name.setStyleSheet("font-weight:bold;")
-        self.lbl_step_time = QtWidgets.QLabel('Step duration')
-        self.lbl_step_time.setStyleSheet("font-weight:bold;")
-
-        # User text input
-        self.txt_description = QtWidgets.QTextEdit('Add protocol description')
         self.txt_description.setFixedHeight(50)
-
-        self.txt_step_name = QtWidgets.QLineEdit('Add step name...')
-        self.txt_step_name.setStyleSheet("alignment:top;")
-
-        self.txt_step_time = QtWidgets.QLineEdit("0")
+        self.txt_step_name.setStyleSheet("alignment:top")
 
         # #Heritage code - DO NOT DELETE - In case want to go back to create/load in this window
         # # Create new protocol file
@@ -110,25 +115,26 @@ class Setup(QtWidgets.QMainWindow):
         # self.btn_load_project = QtWidgets.QPushButton('Load')
         # self.btn_load_project.clicked.connect(self.load)
 
+        # Load existing recipe file
+        self.btn_load.setStyleSheet("height: 25; margin-top:15")
+        self.btn_load.setFixedWidth(150)
+        self.btn_load.clicked.connect(self.load_recipe)
+
         # Add step
-        self.btn_step_add = QtWidgets.QPushButton('Add')
         # self.btn_step_add.setFixedWidth(40)
         self.btn_step_add.clicked.connect(self.add)
 
         # Reset
-        self.btn_reset_recipe = QtWidgets.QPushButton('Reset')
         self.btn_reset_recipe.setStyleSheet("background-color: #6A3A3A; height: 25;margin-top:15;")
         self.btn_reset_recipe.setFixedWidth(100)
         self.btn_reset_recipe.clicked.connect(self.PopUpReset)
 
         # Save
-        self.btn_save = QtWidgets.QPushButton('Save')
-        self.btn_save.setStyleSheet("height: 25;margin-top:15;")
-        self.btn_save.setFixedWidth(150)
-        self.btn_save.clicked.connect(self.file_save)
+        # self.btn_save.setStyleSheet("height: 25;margin-top:15;")
+        # self.btn_save.setFixedWidth(150)
+        # self.btn_save.clicked.connect(self.file_save)
 
         # Go to next window
-        self.btn_start = QtWidgets.QPushButton("Continue >")
         self.btn_start.setStyleSheet("background-color: #4933FF; color: white; height: 25;margin-top:15; ")
         self.btn_start.setFixedWidth(100)
         self.btn_start.pressed.connect(self.PopUpRun)
@@ -137,6 +143,10 @@ class Setup(QtWidgets.QMainWindow):
     def display_widgets(self):
         # HexagonFab label
         self.layout.addWidget(self.header_label, 1, 2, 1, 1)
+
+        # Load button and description
+        # self.layout.addWidget(self.lbl_load, 2, 2, 1, 1)
+        # self.layout.addWidget(self.btn_load, 4, 2, 1, 1)
 
         # Description
         self.layout.addWidget(self.lbl_description, 2, 2, 1, 1)
@@ -157,40 +167,63 @@ class Setup(QtWidgets.QMainWindow):
         # self.layout.addWidget(self.btn_step_add, 14, 5, 1, 1, QtCore.Qt.AlignRight)
         self.layout.addWidget(self.btn_step_add, 14, 5, 1, 1, QtCore.Qt.AlignCenter)
         self.layout.addWidget(self.btn_reset_recipe, 16, 2, 2, 1)
-        self.layout.addWidget(self.btn_save, 16, 2, 2, 4, QtCore.Qt.AlignCenter)
+        self.layout.addWidget(self.btn_load, 16, 2, 2, 4, QtCore.Qt.AlignCenter)
         self.layout.addWidget(self.btn_start, 16, 5, 2, 1, QtCore.Qt.AlignRight)
 
         # Recipe table
-        self.layout.addWidget(self.recipeTable, 6, 2, 4, 4)
+        self.layout.addWidget(self.recipe_table, 6, 2, 4, 4)
 
         self.show()
 
     # Generate and populate table from user data
     def generate_recipe_table(self):
-        self.recipeTable.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-        self.recipeTable.setRowCount(len(self.recipe['step_txt']))
-        self.recipeTable.setColumnCount(2)
+        self.recipe_table.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        self.recipe_table.setRowCount(len(self.recipe['step_txt']))
+        self.recipe_table.setColumnCount(2)
 
-        # self.recipeTable.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
-        self.recipeTable.setHorizontalHeaderLabels(['Step Name', 'Duration'])
-        # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
-        header = self.recipeTable.horizontalHeader()
+        # self.recipe_table.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.recipe_table.setHorizontalHeaderLabels(['Step Name', 'Duration'])
+        # self.recipe_table.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
+        header = self.recipe_table.horizontalHeader()
         header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        #header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        # header.setResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
         # Populate table with recipe data
         for row in range(len(self.recipe['step_txt'])):
-            self.recipeTable.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
-            self.recipeTable.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
+            self.recipe_table.setItem(row, 0, QTableWidgetItem(self.recipe['step_txt'][row]))
+            self.recipe_table.setItem(row, 1, QTableWidgetItem(self.recipe['step_time'][row]))
             row += 1
 
-        self.recipeTable.setFixedHeight(400)
-        self.recipeTable.resizeRowsToContents()
+        self.recipe_table.setFixedHeight(400)
+        self.recipe_table.resizeRowsToContents()
 
         # Update recipe file from direct user table input
-        self.recipeTable.itemChanged.connect(self.user_update)
+        self.recipe_table.itemChanged.connect(self.user_update)
 
         self.show()
+
+    # Load recipe from earlier project
+    def load_recipe(self):
+        try:
+            file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getenv('HOME'))[0]
+            file = open(file_path, 'r+')  # Open with the intention to read
+
+            if file.mode == 'r+':  # Check if file is in 'read mode'
+                self.recipe = {'step_txt': [], 'step_time': []}
+                # self.protocol_description = file.readline()
+                # print(self.protocol_description)
+
+                for x in range(2):
+                    next(file)
+
+                for line in file:
+                    content = line.split(' : ')
+                    self.recipe['step_txt'].append(content[0])
+                    self.recipe['step_time'].append(content[1].rstrip())
+
+            self.generate_recipe_table()
+        except:
+            print('Load file error')
 
     # Update protocol based on direct changes to table
     def user_update(self, item):
@@ -263,8 +296,8 @@ class Setup(QtWidgets.QMainWindow):
             pass
 
     def SwitchMain(self):
-        pass_val = [self.recipe, self.path]
-        self.switch_mainwindow.emit(pass_val)
+        pass_value = [self.recipe, self.path]
+        self.switch_mainwindow.emit(pass_value)
 
     def SwitchLanding(self):
         self.switch_landingwindow.emit()
@@ -286,14 +319,16 @@ class Setup(QtWidgets.QMainWindow):
 
     def PopUpReset(self):
         choice = QtWidgets.QMessageBox.question(self, 'Reset', 'Are you sure you wish to reset the protocol?',
-                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+                                                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
+            self.txt_description = QtWidgets.QTextEdit('Add protocol description...')
             self.recipe = {'step_txt': [], 'step_time': []}
             self.generate_recipe_table()
         else:
             pass
 
     def PopUpRun(self):
+        self.file_save()
         text_message = "Ready to set up experiment?"
 
         msgBox = QMessageBox()
