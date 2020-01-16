@@ -159,12 +159,12 @@ class TestWindow(QtWidgets.QMainWindow):
         # Plot widgets and lines
         self.plot = pg.PlotWidget()
         self.plot.setBackground('#121212')
-        self.l1 = self.plot.plot(pen=pg.mkPen(color=(5,201,133), width=2))
-        self.l2 = self.plot.plot(pen=pg.mkPen(color=(253,203,98), width=2))
-        self.l3 = self.plot.plot(pen=pg.mkPen('w', width=2))
-        self.l4 = self.plot.plot(pen=pg.mkPen(color=(5,201,133), width=2, style=QtCore.Qt.DashLine))
-        self.l5 = self.plot.plot(pen=pg.mkPen(color=(253,203,98), width=2, style=QtCore.Qt.DashLine))
-        self.l6 = self.plot.plot(pen=pg.mkPen('w', width=2, style=QtCore.Qt.DashLine))
+        self.l1 = self.plot.plot(pen=pg.mkPen('r', width=3), name="Sensor 1 - Ch1")
+        self.l2 = self.plot.plot(pen=pg.mkPen('r', width=3, style=QtCore.Qt.DashLine), name="Sensor 1 - Ch2")
+        self.l3 = self.plot.plot(pen=pg.mkPen('y', width=3))
+        self.l4 = self.plot.plot(pen=pg.mkPen('b', width=3), name="Sensor 2 - Ch1")
+        self.l5 = self.plot.plot(pen=pg.mkPen('b', width=3, style=QtCore.Qt.DashLine), name="Sensor 2 - Ch2")
+        self.l6 = self.plot.plot(pen=pg.mkPen('w', width=3))
 
         # --------------------------------------------
 
