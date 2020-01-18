@@ -1,7 +1,10 @@
 # Import general modules
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-# Minor edit
+
+# Import style packages
+import qtmodern.styles
+import qtmodern.windows
 
 # Import Perlis modules
 from class_setup import class_setup_main
@@ -9,16 +12,13 @@ from class_mainwindow import class_mainwindow_main
 from class_landing import class_landing_main
 from class_testwindow import class_testwindow_main
 
-import qtmodern.styles
-import qtmodern.windows
-
 
 # Passvalue is a list: [0] is a dict with the recipe; [1] is a str with the path
 # Define controller to act
 class Controller(QtWidgets.QMainWindow):
-    '''
+    """
     Controller switches between program windows.
-    '''
+    """
     def __init__(self):
         super(Controller, self).__init__()
         # Initialize landing window
@@ -85,8 +85,8 @@ class Controller(QtWidgets.QMainWindow):
 def main():
     app = QtWidgets.QApplication(sys.argv)
     qtmodern.styles.dark(app)
-    controller = Controller()
-    controller.show_landing()
+    control = Controller()
+    control.show_landing()
     # mw = qtmodern.windows.ModernWindow(controller)
     # mw.show()
 

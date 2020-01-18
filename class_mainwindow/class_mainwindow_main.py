@@ -229,7 +229,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.recipeTable.resizeRowsToContents()
         # self.recipeTable.resizeColumnsToContents()
 
-        self.recipeTable.setHorizontalHeaderLabels(['Steps', 'Duration'])
+        self.recipeTable.setHorizontalHeaderLabels(['Steps', 'Duration [sec]'])
         # self.recipeTable.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
         header = self.recipeTable.horizontalHeader()
         header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
@@ -345,11 +345,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print(self.port)
 
         try:
-            self.ard = serial.Serial(
-                port=self.port,
-                baudrate=500000,
-                timeout=2
-            )
+            self.ard = serial.Serial(port=self.port, baudrate=500000, timeout=2)
             time.sleep(2)
             self.go_state = True
             print('port set')

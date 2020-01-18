@@ -57,7 +57,7 @@ class setup(QtWidgets.QMainWindow):
         self.lbl_description = QtWidgets.QLabel('Set up your protocol')
         self.lbl_recipe = QtWidgets.QLabel('Protocol')
         self.lbl_step_name = QtWidgets.QLabel('Input step name')
-        self.lbl_step_time = QtWidgets.QLabel('Step duration')
+        self.lbl_step_time = QtWidgets.QLabel('Step duration [sec]')
 
         self.protocol_description = 'Add protocol description...'
 
@@ -182,7 +182,7 @@ class setup(QtWidgets.QMainWindow):
         self.recipe_table.setColumnCount(2)
 
         # self.recipe_table.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
-        self.recipe_table.setHorizontalHeaderLabels(['Step Name', 'Duration'])
+        self.recipe_table.setHorizontalHeaderLabels(['Step Name', 'Duration [sec]'])
         # self.recipe_table.horizontalHeaderItem().setTextAlignment(QtGui.AlignHCenter)
         header = self.recipe_table.horizontalHeader()
         header.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
